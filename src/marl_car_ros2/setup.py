@@ -1,0 +1,34 @@
+from glob import glob
+
+from setuptools import setup
+
+package_name = "marl_car_ros2"
+
+setup(
+    name=package_name,
+    version="0.1.0",
+    packages=[package_name],
+    data_files=[
+        ("share/ament_index/resource_index/packages", [f"resource/{package_name}"]),
+        (f"share/{package_name}", ["package.xml"]),
+        (f"share/{package_name}/launch", glob("launch/*.launch.py")),
+        (f"share/{package_name}/worlds", glob("worlds/*.world")),
+        (f"share/{package_name}/models/simple_marl_car", glob("models/simple_marl_car/*")),
+    ],
+    install_requires=["setuptools"],
+    zip_safe=True,
+    maintainer="you",
+    maintainer_email="you@example.com",
+    description="AI-native node-as-agent MARL bridge for ROS2 car simulation.",
+    license="MIT",
+    entry_points={
+        "console_scripts": [
+            "dummy_joint_runner = marl_car_ros2.dummy_joint_runner:main",
+            "train_rllib = marl_car_ros2.train_rllib:main",
+            "world_model_mutator = marl_car_ros2.world_model_mutator:main",
+            "multi_agent_game = marl_car_ros2.multi_agent_game:main",
+            "monitor_logger = marl_car_ros2.monitor_logger_node:main",
+            "evaluation_metrics = marl_car_ros2.evaluation_metrics:main",
+        ],
+    },
+)
