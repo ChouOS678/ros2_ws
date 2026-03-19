@@ -25,6 +25,10 @@ setup(
         "console_scripts": [
             "dummy_joint_runner = marl_car_ros2.dummy_joint_runner:main",
             "train_rllib = marl_car_ros2.train_rllib:main",
+            "baseline_nav_node = marl_car_ros2.baseline_nav_node:main",
+            "task_agent = marl_car_ros2.task_agent:main",
+            "supervisor_node = marl_car_ros2.supervisor_node:main",
+            "scenario_mutator = marl_car_ros2.scenario_mutator:main",
             "world_model_mutator = marl_car_ros2.world_model_mutator:main",
             "multi_agent_game = marl_car_ros2.multi_agent_game:main",
             "monitor_logger = marl_car_ros2.monitor_logger_node:main",

@@ -4,7 +4,7 @@ import json
 import os
 import sqlite3
 import time
-from typing import Dict
+from typing import Dict, List
 
 import rclpy
 from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
@@ -17,6 +17,9 @@ from std_srvs.srv import Trigger
 class MonitorLoggerNode(Node):
     """
     Cross-agent timeline aggregator for online monitoring and offline replay.
+
+    In addition to legacy status/event tracking, this node now records
+    architecture-level thesis metrics from task_agent + supervisor.
     """
 
     def __init__(self) -> None:
@@ -49,10 +52,19 @@ class MonitorLoggerNode(Node):
         self.deadlock_risk = 0
         self.starvation_risk = 0
 
+        self.decision_latency_samples: List[float] = []
+        self.supervisor_override_count = 0
+        self.replan_count = 0
+        self.recovery_trigger_count = 0
+        self.blocked_stuck_duration_s = 0.0
+        self.mission_completion_status = "unknown"
+
         self.create_subscription(String, "/agents/status", self._status_cb, 50)
         self.create_subscription(String, "/agents/events", self._event_cb, 100)
         self.create_subscription(String, "/world_model/events", self._world_cb, 20)
         self.create_subscription(String, "/marl/reward_breakdown", self._reward_cb, 20)
+        self.create_subscription(String, "/agent/decision", self._decision_cb, 20)
+        self.create_subscription(String, "/supervisor/status", self._supervisor_status_cb, 20)
         self.create_subscription(Odometry, "/odom", self._odom_cb, 20)
 
         self.monitor_pub = self.create_publisher(String, "/monitor/summary", 20)
@@ -100,6 +112,20 @@ class MonitorLoggerNode(Node):
             )
             """
         )
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS arch_metrics(
+                wall_time REAL,
+                decision_latency_ms REAL,
+                supervisor_override_count INTEGER,
+                replan_count INTEGER,
+                recovery_trigger_count INTEGER,
+                blocked_stuck_duration_s REAL,
+                mission_completion_status TEXT,
+                payload_json TEXT
+            )
+            """
+        )
         self.db.commit()
 
     def _status_cb(self, msg: String) -> None:
@@ -118,6 +144,29 @@ class MonitorLoggerNode(Node):
             return
         sender = str(payload.get("sender", "unknown"))
         self.last_event_by_agent[sender] = time.time()
+
+        event_type = str(payload.get("event_type", ""))
+        result = str(payload.get("result", ""))
+        details = payload.get("details", {})
+        if not isinstance(details, dict):
+            details = {}
+        if event_type == "mission_completed" or result == "goal_reached":
+            self.mission_completion_status = "success"
+        if event_type in ("task_failed", "mission_failed"):
+            self.mission_completion_status = "failed"
+        if event_type == "replan_requested":
+            self.replan_count = max(self.replan_count, int(details.get("replan_count", 0)))
+        if event_type == "recovery_requested":
+            self.recovery_trigger_count = max(
+                self.recovery_trigger_count,
+                int(details.get("recovery_count", 0)),
+            )
+        if event_type == "supervisor_override":
+            self.supervisor_override_count = max(
+                self.supervisor_override_count,
+                int(details.get("override_count", 0)),
+            )
+
         self.event_file.write(json.dumps(payload, ensure_ascii=True) + "\n")
         self.event_file.flush()
         self._insert_event(payload)
@@ -131,6 +180,28 @@ class MonitorLoggerNode(Node):
         payload = self._parse_json(msg.data)
         if payload and float(payload.get("stuck", 0.0)) > 0.0:
             self.deadlock_risk += 1
+
+    def _decision_cb(self, msg: String) -> None:
+        payload = self._parse_json(msg.data)
+        if not payload:
+            return
+        lat = float(payload.get("decision_latency_ms", 0.0))
+        if lat > 0.0:
+            self.decision_latency_samples.append(lat)
+            if len(self.decision_latency_samples) > 500:
+                self.decision_latency_samples = self.decision_latency_samples[-500:]
+
+    def _supervisor_status_cb(self, msg: String) -> None:
+        payload = self._parse_json(msg.data)
+        if not payload:
+            return
+        self.supervisor_override_count = max(self.supervisor_override_count, int(payload.get("override_count", 0)))
+        self.replan_count = max(self.replan_count, int(payload.get("replan_count", 0)))
+        self.recovery_trigger_count = max(self.recovery_trigger_count, int(payload.get("recovery_count", 0)))
+        self.blocked_stuck_duration_s = float(payload.get("blocked_duration_s", self.blocked_stuck_duration_s))
+        mission_status = str(payload.get("mission_status", ""))
+        if mission_status:
+            self.mission_completion_status = mission_status
 
     def _odom_cb(self, msg: Odometry) -> None:
         self.latest_odom_xy = (
@@ -160,6 +231,8 @@ class MonitorLoggerNode(Node):
         for agent_id, typ, detail in anomalies:
             self._insert_anomaly(typ, agent_id, detail)
 
+        decision_latency = self._avg(self.decision_latency_samples)
+
         summary = {
             "wall_time": now,
             "agent_count": len(self.status_cache),
@@ -168,12 +241,22 @@ class MonitorLoggerNode(Node):
             "latest_world_event": self.latest_world_event,
             "robot_pose_xy": {"x": self.latest_odom_xy[0], "y": self.latest_odom_xy[1]},
             "anomalies": [{"agent_id": a, "type": t, "detail": d} for a, t, d in anomalies],
+            "arch_metrics": {
+                "agent_decision_latency_ms": decision_latency,
+                "supervisor_override_count": self.supervisor_override_count,
+                "replan_count": self.replan_count,
+                "recovery_trigger_count": self.recovery_trigger_count,
+                "blocked_stuck_duration_s": self.blocked_stuck_duration_s,
+                "mission_completion_status": self.mission_completion_status,
+            },
         }
         msg = String()
         msg.data = json.dumps(summary, ensure_ascii=True)
         self.monitor_pub.publish(msg)
         self.summary_file.write(msg.data + "\n")
         self.summary_file.flush()
+
+        self._insert_arch_metrics(summary)
         self._publish_diagnostics(summary)
 
     def _publish_diagnostics(self, summary: Dict[str, object]) -> None:
@@ -185,10 +268,17 @@ class MonitorLoggerNode(Node):
         anomaly_cnt = len(summary.get("anomalies", []))
         status.level = DiagnosticStatus.WARN if anomaly_cnt > 0 else DiagnosticStatus.OK
         status.message = "anomaly_detected" if anomaly_cnt > 0 else "healthy"
+
+        arch = summary.get("arch_metrics", {}) if isinstance(summary.get("arch_metrics", {}), dict) else {}
         status.values = [
             KeyValue(key="agent_count", value=str(summary.get("agent_count", 0))),
             KeyValue(key="deadlock_risk_count", value=str(summary.get("deadlock_risk_count", 0))),
             KeyValue(key="starvation_risk_count", value=str(summary.get("starvation_risk_count", 0))),
+            KeyValue(key="decision_latency_ms", value=str(arch.get("agent_decision_latency_ms", 0.0))),
+            KeyValue(key="supervisor_override_count", value=str(arch.get("supervisor_override_count", 0))),
+            KeyValue(key="replan_count", value=str(arch.get("replan_count", 0))),
+            KeyValue(key="recovery_trigger_count", value=str(arch.get("recovery_trigger_count", 0))),
+            KeyValue(key="mission_completion_status", value=str(arch.get("mission_completion_status", "unknown"))),
         ]
         arr.status = [status]
         self.diag_pub.publish(arr)
@@ -202,6 +292,14 @@ class MonitorLoggerNode(Node):
                 "latest_world_event": self.latest_world_event,
                 "deadlock_risk_count": self.deadlock_risk,
                 "starvation_risk_count": self.starvation_risk,
+                "arch_metrics": {
+                    "agent_decision_latency_ms": self._avg(self.decision_latency_samples),
+                    "supervisor_override_count": self.supervisor_override_count,
+                    "replan_count": self.replan_count,
+                    "recovery_trigger_count": self.recovery_trigger_count,
+                    "blocked_stuck_duration_s": self.blocked_stuck_duration_s,
+                    "mission_completion_status": self.mission_completion_status,
+                },
                 "db_path": self.db_path,
             },
             ensure_ascii=True,
@@ -224,7 +322,6 @@ class MonitorLoggerNode(Node):
             )
             self.db.commit()
         except sqlite3.OperationalError as exc:
-            # Avoid crashing the monitor when an old process still holds DB locks.
             if "locked" in str(exc).lower():
                 self.get_logger().warn("timeline.db is locked; skipping one status write")
                 return
@@ -266,6 +363,29 @@ class MonitorLoggerNode(Node):
                 return
             raise
 
+    def _insert_arch_metrics(self, summary: Dict[str, object]) -> None:
+        try:
+            arch = summary.get("arch_metrics", {}) if isinstance(summary.get("arch_metrics", {}), dict) else {}
+            self.db.execute(
+                "INSERT INTO arch_metrics VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    float(summary.get("wall_time", time.time())),
+                    float(arch.get("agent_decision_latency_ms", 0.0)),
+                    int(arch.get("supervisor_override_count", 0)),
+                    int(arch.get("replan_count", 0)),
+                    int(arch.get("recovery_trigger_count", 0)),
+                    float(arch.get("blocked_stuck_duration_s", 0.0)),
+                    str(arch.get("mission_completion_status", "unknown")),
+                    json.dumps(summary, ensure_ascii=True),
+                ),
+            )
+            self.db.commit()
+        except sqlite3.OperationalError as exc:
+            if "locked" in str(exc).lower():
+                self.get_logger().warn("timeline.db is locked; skipping one arch metric write")
+                return
+            raise
+
     @staticmethod
     def _parse_json(raw: str) -> Dict[str, object]:
         try:
@@ -275,6 +395,12 @@ class MonitorLoggerNode(Node):
             return {}
         except json.JSONDecodeError:
             return {}
+
+    @staticmethod
+    def _avg(values: List[float]) -> float:
+        if not values:
+            return 0.0
+        return float(sum(values) / len(values))
 
     def destroy_node(self) -> bool:
         try:

@@ -1,156 +1,252 @@
-# Multi-Agent Robot Architecture (ROS 2 Jazzy + Gazebo Sim)
+# Mobile Robot Thesis Architecture (ROS 2 Jazzy + Gazebo Sim)
 
-## 1. Project Summary
-This workspace hosts a **Multi-Agent Robot Architecture** prototype built on ROS 2 (Jazzy) and Gazebo Sim.
+This workspace now supports a research-oriented architecture for thesis experiments:
 
-The goal is not only to drive a demo car, but to validate an AI-native robotics architecture where:
-- ROS 2 nodes act as independent agents,
-- agents coordinate under uncertainty,
-- the system remains robust under perturbations (for example, sudden obstacle / "鬼探头" style events),
-- the architecture can be continuously evaluated with reproducible local CI loops.
+- Baseline path: navigation without the Agent task-control layer
+- Proposed path: Nav-executor + `task_agent` + `supervisor`
+- Disturbance/scenario injection with reproducible seeds
+- Unified timeline logging for online/offline experiment analysis
 
-Current package: `marl_car_ros2`
-
----
-
-## 2. What Was Done Today
-
-### 2.1 Gazebo Backend Migration and Launch Stabilization
-- Migrated launch flow away from Gazebo Classic assumptions (`gazebo`, `gazebo_ros`) to **Gazebo Sim + ros_gz** in Jazzy.
-- Updated launch to use:
-  - `ros_gz_sim` for simulation startup and spawning
-  - `ros_gz_bridge` for ROS <-> Gazebo topic bridging
-- Fixed startup failure where model spawn parameters used wrong numeric type (`x/y` int vs required double).
-
-### 2.2 World and Model Compatibility Fixes
-- Reworked world file to avoid dependency on missing `model://ground_plane` / `model://sun` in local environment.
-- Added required Gazebo Sim world systems (`Physics`, `Sensors`, `UserCommands`, `SceneBroadcaster`) for stable runtime and sensor pipeline.
-- Migrated robot model plugins from Gazebo Classic plugins to Gazebo Sim compatible setup.
-
-### 2.3 Runtime Control/Loop Fixes
-- Identified and mitigated control instability from duplicate / residual processes and bridge loop risks.
-- Added launch-time control behavior switch:
-  - `start_game:=false` for passive mode
-  - `start_game:=true` for active autonomous game loop
-
-### 2.4 Monitor Logger Robustness
-- Hardened `monitor_logger_node.py` SQLite behavior:
-  - enabled WAL and busy timeout,
-  - added lock-tolerant write paths to reduce crash probability under process overlap.
-
-### 2.5 Automated CI / Evaluation Pipeline Entrypoint
-Added:
-- `auto_eval_pipeline.py`
-
-Capabilities:
-- strict epoch lifecycle: teardown -> setup -> execute -> evaluate -> teardown,
-- aggressive cleanup protocol (`pkill -9`, daemon reset, shared-memory cleanup),
-- readiness gating based on active topic publication (`/clock`, `/odom`),
-- timeout/crash handling with automatic recovery to next epoch,
-- KPI extraction from monitor SQLite:
-  - success rate,
-  - collision rate,
-  - average time to destination,
-  - real-time factor (RTF).
-
-### 2.6 One-Click WSL2 Local Automation Script
-Added:
-- `wsl2_demo_ctl.sh`
-
-Commands:
-- `up`: hard cleanup + build + launch demo + readiness checks
-- `down`: full cleanup
-- `status`: process/node snapshot
-- `test [SECONDS]`: smoke run with auto cleanup
-
-This script targets the practical WSL2 pain point of stale Gazebo/ROS processes.
+The design intentionally avoids overengineering:
+- ROS 2 nodes are implementation/deployment units
+- Agent is a higher-level decision layer (goal/state/decision)
+- Focus is task-level control over complex navigation situations, not distributed MAS theory
 
 ---
 
-## 3. High-Level Architecture (Current)
+## 1) Old vs New Architecture
 
-### Core Nodes
-- `multi_agent_game`
-  - orchestrates planner/chassis agent outputs
-  - drives joint action loop
-- `marl_env_wrapper`
-  - converts ROS topics (`/odom`, `/scan`) into observations
-  - computes rewards and termination
-  - publishes `/cmd_vel`
-- `world_model_mutator`
-  - injects non-stationary world perturbation events
-- `monitor_logger`
-  - aggregates multi-agent status/events
-  - writes JSONL + SQLite timeline DB
+### Old (prototype, centralized)
+- `multi_agent_game` contained planner/chassis policies and drove main control loop
+- `marl_env_wrapper` mixed runtime control with reward and termination logic
+- System was useful for early validation but too coupled for thesis experiments
 
-### Simulation/Bridge Layer
-- Gazebo Sim (`ros_gz_sim`)
-- Topic bridge (`ros_gz_bridge`)
-  - `/clock`
-  - command/odometry channels
-  - laser scan channel
-
-### Data/Artifacts
-- Runtime logs: `/tmp/marl_logs`
-- Timeline DB: `/tmp/marl_logs/timeline.db`
-- Evaluation outputs: `/tmp/auto_eval_pipeline`
+### New (thesis-oriented, layered)
+- Lower execution layer remains ROS2/Gazebo command chain
+- Added upper task-control layer:
+  - `task_agent`: emits high-level decisions only
+  - `supervisor_node`: validates decisions, enforces safety, arbitrates final motion
+- Refactored eval logic out of runtime path:
+  - `observation_builder.py`
+  - `reward_evaluator.py` (eval/training utility)
+  - `termination_checker.py` (eval/training utility)
+- `scenario_mutator.py` replaces mutator role for repeatable disturbance experiments
 
 ---
 
-## 4. Quick Start
+## 2) Module Responsibilities
 
-### 4.1 One-click local demo (recommended)
+### Runtime control modules
+- `marl_car_ros2/task_agent.py`
+  - mission/task-level decision making
+  - outputs one of:
+    - `normal_navigation`
+    - `trigger_replan`
+    - `cautious_mode`
+    - `pause_and_wait`
+    - `recovery_request`
+    - `fallback_to_nav2`
+  - does not publish low-level velocity
+
+- `marl_car_ros2/supervisor_node.py`
+  - consumes `/agent/decision`
+  - consumes lower-layer velocity command source (`/cmd_vel_nav`)
+  - applies safety constraints / timeout / no-progress checks
+  - owns final command authority and publishes `/cmd_vel`
+
+- `marl_car_ros2/observation_builder.py`
+  - builds runtime observation snapshots from `/odom`, `/scan`, `/world_model/events`
+  - shared by task agent / supervisor / compatibility nodes
+
+- `marl_car_ros2/scenario_mutator.py`
+  - injects disturbance events (ghost probe / friction drop)
+  - supports `random_seed` and configurable event probabilities
+
+- `marl_car_ros2/monitor_logger_node.py`
+  - keeps JSONL + SQLite timeline logging
+  - logs architecture-level metrics:
+    - decision latency
+    - supervisor override count
+    - replan count
+    - recovery trigger count
+    - blocked/stuck duration
+    - mission completion status
+
+### Eval/training utility modules
+- `marl_car_ros2/reward_evaluator.py`
+- `marl_car_ros2/termination_checker.py`
+
+### Compatibility modules
+- `marl_car_ros2/marl_env_wrapper.py`
+  - kept for legacy MARL/eval workflows
+  - no longer the recommended runtime control path
+
+- `marl_car_ros2/world_model_mutator.py`
+  - compatibility wrapper to `scenario_mutator`
+
+- `marl_car_ros2/multi_agent_game.py`
+  - legacy centralized loop retained for backward compatibility
+
+---
+
+## 3) Topic / Service Flow (New Agent Mode)
+
+### Core control flow
+1. Lower nav executor publishes command candidate to `/cmd_vel_nav`
+2. `task_agent` publishes high-level decision to `/agent/decision`
+3. `supervisor_node` arbitrates and publishes final `/cmd_vel`
+4. Gazebo bridge executes `/cmd_vel` and provides `/odom` + `/scan`
+
+### Monitoring and experiment flow
+- `task_agent` / `supervisor_node` publish structured status/events:
+  - `/agents/status`
+  - `/agents/events`
+- `scenario_mutator` publishes disturbance events:
+  - `/world_model/events`
+- `monitor_logger` publishes summary:
+  - `/monitor/summary`
+- Query services:
+  - `/task_agent/query_state`
+  - `/supervisor/query_state`
+  - `/monitor/query_state`
+
+---
+
+## 4) Launch Layout
+
+New launch files:
+- `launch/sim.launch.py`
+  - Gazebo Sim + ros_gz bridge + scenario mutator + monitor
+- `launch/baseline_nav2.launch.py`
+  - baseline mode without task-agent layer
+- `launch/agent_nav2.launch.py`
+  - agent-enhanced mode (`task_agent + supervisor`)
+- `launch/evaluation.launch.py`
+  - switch between baseline/agent mode for experiments
+- `launch/marl_stack_minimal.launch.py`
+  - compatibility entrypoint (legacy workflows still supported)
+
+---
+
+## 5) How to Run
+
+### A. Baseline mode (no task-agent layer)
+```bash
+source /opt/ros/jazzy/setup.bash
+source /home/grok/ros2_ws/install/setup.bash
+ros2 launch marl_car_ros2 baseline_nav2.launch.py
+```
+
+### B. Agent-enhanced mode (proposed method)
+```bash
+source /opt/ros/jazzy/setup.bash
+source /home/grok/ros2_ws/install/setup.bash
+ros2 launch marl_car_ros2 agent_nav2.launch.py
+```
+
+### C. Evaluation launch switch
+```bash
+# agent mode
+ros2 launch marl_car_ros2 evaluation.launch.py agent_mode:=true
+
+# baseline mode
+ros2 launch marl_car_ros2 evaluation.launch.py agent_mode:=false
+```
+
+### D. Legacy compatibility path
+```bash
+# legacy centralized game loop
+ros2 launch marl_car_ros2 marl_stack_minimal.launch.py start_game:=true
+```
+
+---
+
+## 6) Build
+
 ```bash
 cd /home/grok/ros2_ws
-./wsl2_demo_ctl.sh up
-```
-
-Check status:
-```bash
-./wsl2_demo_ctl.sh status
-```
-
-Stop and hard-clean:
-```bash
-./wsl2_demo_ctl.sh down
-```
-
-Smoke test:
-```bash
-./wsl2_demo_ctl.sh test 60
-```
-
-### 4.2 Automated evaluation loop
-```bash
-cd /home/grok/ros2_ws
-python3 auto_eval_pipeline.py --epochs 10 --epoch-timeout 90 --readiness-timeout 60
+colcon build --packages-select marl_car_ros2
+source install/setup.bash
 ```
 
 ---
 
-## 5. Project Structure (Key Files)
-- `src/marl_car_ros2/launch/marl_stack_minimal.launch.py`
-- `src/marl_car_ros2/models/simple_marl_car/model.sdf`
-- `src/marl_car_ros2/worlds/minimal.world`
-- `src/marl_car_ros2/marl_car_ros2/multi_agent_game.py`
-- `src/marl_car_ros2/marl_car_ros2/marl_env_wrapper.py`
-- `src/marl_car_ros2/marl_car_ros2/world_model_mutator.py`
-- `src/marl_car_ros2/marl_car_ros2/monitor_logger_node.py`
-- `auto_eval_pipeline.py`
-- `wsl2_demo_ctl.sh`
+## 7) Experiment Support Mapping
+
+This architecture is ready for staged thesis experiments:
+
+1. End-to-end architecture run
+- use `agent_nav2.launch.py`
+
+2. Traditional baseline
+- use `baseline_nav2.launch.py`
+
+3. Fixed complex scenarios (2~3)
+- configure `scenario_mutator` params and seed
+
+4. Anomaly recovery group
+- evaluate `recovery_request` / supervisor intervention behavior
+
+5. Ablations (1~2)
+- disable task agent (`start_task_agent:=false`) or adjust supervisor checks
+- compare metrics from monitor SQLite/JSONL
 
 ---
 
-## 6. Current Limitations / Next Milestones
-- Multi-agent logic is still centralized relative to a full distributed agent society.
-- More explicit inter-agent protocol (task negotiation, arbitration, retry semantics) is needed.
-- Safety supervisor node and stronger fault-containment boundaries should be added.
-- World mutator should be expanded for richer corner cases and repeatable scenario seeds.
-- KPI suite should include broader mission-level metrics and regression dashboards.
+## 8) Notes on Nav2 Integration
+
+The new architecture keeps a clear command interface (`/cmd_vel_nav` -> supervisor -> `/cmd_vel`) so a full Nav2 stack can be plugged in directly as the lower executor.
+
+For local reproducibility in this repository, a compatibility baseline nav executor node is included (`baseline_nav_node`) to keep simulation runnable even when a full Nav2 configuration is not yet wired.
 
 ---
 
-## 7. Development Notes
-- Use `Ctrl+C` to stop launches; avoid `Ctrl+Z` to prevent suspended process residue.
-- If anything behaves strangely, run `./wsl2_demo_ctl.sh down` before relaunch.
+## 9) What Was Done Today (2026-03-19)
 
+### Refactor delivered
+- Implemented thesis-oriented layered architecture:
+  - added `task_agent.py` (task-level decisions only)
+  - added `supervisor_node.py` (final motion arbitration + safety authority)
+- Decoupled runtime observation from evaluation logic:
+  - added `observation_builder.py`
+  - added `reward_evaluator.py`
+  - added `termination_checker.py`
+- Repositioned disturbance module:
+  - added `scenario_mutator.py` (seeded/configurable injector)
+  - kept `world_model_mutator.py` as compatibility wrapper
+- Added compatibility lower executor:
+  - added `baseline_nav_node.py` (publishes to `/cmd_vel` or `/cmd_vel_nav`)
+- Upgraded monitor/logger:
+  - `monitor_logger_node.py` now logs architecture-level metrics
+  - SQLite now includes `arch_metrics` table
+- Added/updated launch architecture:
+  - `sim.launch.py`
+  - `baseline_nav2.launch.py`
+  - `agent_nav2.launch.py`
+  - `evaluation.launch.py`
+  - `marl_stack_minimal.launch.py` kept as compatibility entrypoint
+- Updated package entrypoints in `setup.py`.
+
+### Build and launch verification
+- Build passed:
+  - `colcon build --packages-select marl_car_ros2`
+- Launch argument parsing passed:
+  - baseline / agent / evaluation / compatibility launch files.
+- Smoke startup passed for baseline and agent mode (processes start successfully).
+
+### Gazebo real run result (today)
+- Executed real Gazebo run with `agent_nav2.launch.py`.
+- System startup succeeded:
+  - Gazebo, bridge, scenario mutator, monitor, task agent, supervisor all running
+  - robot spawn successful (`Entity creation successful`)
+- Runtime observation:
+  - `/odom` available
+  - `/agent/decision` reported `pause_and_wait` with reason `sensor_not_ready`
+  - `/supervisor/status` stayed in `waiting`
+  - `/cmd_vel` remained zero due to supervisor safety hold
+- Current blocking point:
+  - `/scan` topic exists but no message observed during test window
+  - therefore agent layer correctly refuses to enter active navigation.
+
+### Immediate next action
+- Fix `/scan` data path (sensor publish/bridge chain) to unlock active movement in agent mode.
