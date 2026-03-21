@@ -149,3 +149,24 @@ Dashboard / Offline Analyzer
 - 将所有关键 Agent 接入统一 `trace_id/correlation_id`。
 - 配置固定 rosbag 录制模板 + monitor 双写。
 - 每周基于 SQLite 跑指标报表，持续压低 deadlock 与 starvation。
+
+## 12. Contract v1（增量兼容）
+- 统一契约实现在 `marl_car_ros2/shared_types.py`，当前采用“新字段 + 旧字段并存”策略。
+- 新增统一概念枚举：
+`RobotMode, RiskLevel, BlockReason, RecoveryReason, SupervisorDecision, ExperimentEventType`
+- 实验事件统一结构（保留兼容）：
+`schema_version, event_id, event_type, event_status, risk_level, severity, source, details, sim_time, wall_time`
+- 兼容字段继续保留：
+`type, status, reason, decision_type`
+- monitor/logger 兼容策略：
+优先消费 `event_type/event_status`，若不存在自动回退到 `type/status`；
+`replanned` 自动归一化为 `replan_requested` 参与统计。
+
+## 13. Monitor Timeline Event JSONL（Replay 优先）
+- 文件：`monitor_timeline_event.jsonl`
+- 每行一个事件，建议 schema：
+`schema_version, event_id, event_type, event_phase, trace_id, mission_id, sim_time, wall_time, source_topic, manager_mode, mode_reason, risk_level, min_range, severity, override_reason, local_goal_bias, topic_timing, details`
+- 重点事件类型：
+`mode_switch, risk_level_change, no_progress, replan, recovery`
+- `topic_timing` 用于时序对齐，建议包含：
+`recv_wall_time, source_sim_time(optional), source_wall_time(optional), age_recv_s, transport_delay_s(optional)`

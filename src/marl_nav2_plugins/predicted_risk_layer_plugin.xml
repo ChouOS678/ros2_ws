@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<library path="predicted_risk_layer">
+  <class
+    type="marl_nav2_plugins::PredictedRiskLayer"
+    base_class_type="nav2_costmap_2d::Layer"
+    name="marl_nav2_plugins::PredictedRiskLayer">
+    <description>
+      Local costmap layer that projects short-horizon constant-velocity obstacle risk.
+    </description>
+  </class>
+</library>

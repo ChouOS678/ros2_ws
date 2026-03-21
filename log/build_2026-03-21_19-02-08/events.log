@@ -1,0 +1,223 @@
+[0.000000] (-) TimerEvent: {}
+[0.000075] (-) JobUnselected: {'identifier': 'marl_car_ros2'}
+[0.000406] (marl_nav2_plugins) JobQueued: {'identifier': 'marl_nav2_plugins', 'dependencies': OrderedDict()}
+[0.000444] (marl_nav2_plugins) JobStarted: {'identifier': 'marl_nav2_plugins'}
+[0.015405] (marl_nav2_plugins) JobProgress: {'identifier': 'marl_nav2_plugins', 'progress': 'cmake'}
+[0.016818] (marl_nav2_plugins) Command: {'cmd': ['/usr/bin/cmake', '/home/grok/ros2_ws/src/marl_nav2_plugins', '-DCMAKE_INSTALL_PREFIX=/home/grok/ros2_ws/install/marl_nav2_plugins'], 'cwd': '/home/grok/ros2_ws/build/marl_nav2_plugins', 'env': OrderedDict({'LESSOPEN': '| /usr/bin/lesspipe %s', 'VSCODE_CWD': '/mnt/d/Microsoft VS Code', 'VSCODE_ESM_ENTRYPOINT': 'vs/workbench/api/node/extensionHostProcess', 'CODEX_CI': '1', 'GZ_SIM_RESOURCE_PATH': '/opt/ros/jazzy/share', 'USER': 'grok', 'CODEX_INTERNAL_ORIGINATOR_OVERRIDE': 'codex_vscode', 'VSCODE_NLS_CONFIG': '{"userLocale":"zh-cn","osLocale":"zh-cn","resolvedLanguage":"zh-cn","defaultMessagesFile":"/home/grok/.vscode-server/bin/ce099c1ed25d9eb3076c11e4a280f3eb52b4fbeb/out/nls.messages.json","languagePack":{"translationsConfigFile":"/home/grok/.vscode-server/data/clp/260f1e75be0cfbabbd36f02f327e4f1d.zh-cn/tcf.json","messagesFile":"/home/grok/.vscode-server/data/clp/260f1e75be0cfbabbd36f02f327e4f1d.zh-cn/ce099c1ed25d9eb3076c11e4a280f3eb52b4fbeb/nls.messages.json","corruptMarkerFile":"/home/grok/.vscode-server/data/clp/260f1e75be0cfbabbd36f02f327e4f1d.zh-cn/corrupted.info"},"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"260f1e75be0cfbabbd36f02f327e4f1d.zh-cn","_languagePackSupport":true,"_translationsConfigFile":"/home/grok/.vscode-server/data/clp/260f1e75be0cfbabbd36f02f327e4f1d.zh-cn/tcf.json","_cacheRoot":"/home/grok/.vscode-server/data/clp/260f1e75be0cfbabbd36f02f327e4f1d.zh-cn","_resolvedLanguagePackCoreLocation":"/home/grok/.vscode-server/data/clp/260f1e75be0cfbabbd36f02f327e4f1d.zh-cn/ce099c1ed25d9eb3076c11e4a280f3eb52b4fbeb","_corruptedFile":"/home/grok/.vscode-server/data/clp/260f1e75be0cfbabbd36f02f327e4f1d.zh-cn/corrupted.info"}', 'GZ_CONFIG_PATH': '/opt/ros/jazzy/opt/gz_sim_vendor/share/gz:/opt/ros/jazzy/opt/sdformat_vendor/share/gz:/opt/ros/jazzy/opt/gz_gui_vendor/share/gz:/opt/ros/jazzy/opt/gz_transport_vendor/share/gz:/opt/ros/jazzy/opt/gz_rendering_vendor/share/gz:/opt/ros/jazzy/opt/gz_plugin_vendor/share/gz:/opt/ros/jazzy/opt/gz_fuel_tools_vendor/share/gz:/opt/ros/jazzy/opt/gz_msgs_vendor/share/gz:/opt/ros/jazzy/opt/gz_common_vendor/share/gz', 'VSCODE_WSL_EXT_LOCATION': '/mnt/c/Users/35239/.vscode/extensions/ms-vscode-remote.remote-wsl-0.104.3', 'VSCODE_HANDLES_UNCAUGHT_ERRORS': 'true', 'DEBUG': 'release', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/jazzy/opt/gz_sim_vendor/lib:/opt/ros/jazzy/opt/gz_sensors_vendor/lib:/opt/ros/jazzy/opt/gz_physics_vendor/lib:/opt/ros/jazzy/opt/sdformat_vendor/lib:/opt/ros/jazzy/opt/rviz_ogre_vendor/lib:/opt/ros/jazzy/lib/x86_64-linux-gnu:/opt/ros/jazzy/opt/gz_gui_vendor/lib:/opt/ros/jazzy/opt/gz_transport_vendor/lib:/opt/ros/jazzy/opt/gz_rendering_vendor/lib:/opt/ros/jazzy/opt/gz_plugin_vendor/lib:/opt/ros/jazzy/opt/gz_fuel_tools_vendor/lib:/opt/ros/jazzy/opt/gz_msgs_vendor/lib:/opt/ros/jazzy/opt/gz_common_vendor/lib:/opt/ros/jazzy/opt/gz_math_vendor/lib:/opt/ros/jazzy/opt/gz_utils_vendor/lib:/opt/ros/jazzy/opt/gz_tools_vendor/lib:/opt/ros/jazzy/opt/gz_ogre_next_vendor/lib:/opt/ros/jazzy/opt/gz_dartsim_vendor/lib:/opt/ros/jazzy/opt/gz_cmake_vendor/lib:/opt/ros/jazzy/lib', 'WT_PROFILE_ID': '{5a415fbe-0c9d-560f-b1fe-bd7eb79cf849}', 'HOME': '/home/grok', 'CONDA_SHLVL': '0', 'VSCODE_RECONNECTION_GRACE_TIME': '10800000', 'VSCODE_IPC_HOOK_CLI': '/run/user/1000/vscode-ipc-c50c7fb5-3824-4d91-bd99-e1b97ad89e62.sock', 'ROS_PYTHON_VERSION': '3', 'PAGER': 'cat', 'LC_CTYPE': 'C.UTF-8', 'NO_COLOR': '1', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': '', 'WSL_DISTRO_NAME': 'Ubuntu', 'WAYLAND_DISPLAY': 'wayland-0', 'ROS_DISTRO': 'jazzy', 'LOGNAME': 'grok', 'NAME': 'Code', 'WSL_INTEROP': '/run/WSL/660_interop', 'VSCODE_HANDLES_SIGPIPE': 'true', 'PULSE_SERVER': 'unix:/mnt/wslg/PulseServer', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'RUST_LOG': 'warn', 'TERM': 'dumb', 'PATH': '/home/grok/.local/bin:/home/grok/.codex/tmp/arg0/codex-arg0Ynzp1i:/home/grok/.vscode-server/bin/ce099c1ed25d9eb3076c11e4a280f3eb52b4fbeb/bin/remote-cli:/home/grok/.local/bin:/opt/ros/jazzy/opt/gz_msgs_vendor/bin:/opt/ros/jazzy/opt/gz_tools_vendor/bin:/opt/ros/jazzy/opt/gz_ogre_next_vendor/bin:/opt/ros/jazzy/bin:/home/grok/miniforge3/bin:/home/grok/.local/share/mamba/condabin:/home/grok/miniforge3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/lib/wsl/lib:/mnt/c/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.8/bin:/mnt/c/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.8/libnvvp:/mnt/d/Program Files (x86)/VMware/VMware Workstation/bin/:/mnt/c/Program Files/Common Files/Oracle/Java/javapath:/mnt/c/Windows/system32:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/d/Program Files/MATLAB/R2022b/runtime/win64:/mnt/d/Program Files/MATLAB/R2022b/bin:/mnt/c/Program Files/Microsoft SQL Server/130/Tools/Binn/:/mnt/c/Program Files/nodejs:/mnt/c/Users/35239/AppData/Local/Huawei/ohpm/bin:/mnt/d/MinGW64/mingw64/mingw64/bin:/mnt/c/ProgramData/Microsoft/Windows/Start Menu/Programs/MySQL/MySQL Server 8.0:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA app/NvDLISR:/mnt/c/Program Files/MySQL/MySQL Server 8.0/bin:/mnt/d/Git/cmd:/mnt/d/cxdownload/apache-tomcat-11.0.4-windows-x64/apache-tomcat-11.0.4/bin":/mnt/c/Program Files/NVIDIA Corporation/Nsight Compute 2025.1.1/:/mnt/c/WINDOWS/system32:/mnt/c/WINDOWS:/mnt/c/WINDOWS/System32/Wbem:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0/:/mnt/c/WINDOWS/System32/OpenSSH/:/mnt/d/apache-maven-3.9.9/apache-maven-3.9.9/bin:/mnt/d/35239/Android/SDK/platform-tools:/mnt/d/Windows Kits/10/Windows Performance Toolkit/:/mnt/c/Users/35239/AppData/Local/Microsoft/WindowsApps:/mnt/d/Program Files/LINGO64_21/:/mnt/d/Users/35239/AppData/Local/Programs/MiKTeX/miktex/bin/x64:/mnt/d/Program Files/cursor/resources/app/bin:/mnt/c/Program Files/Common Files/Oracle/Java/javapath:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/d/Program Files/MATLAB/R2022b/runtime/win64:/mnt/d/Program Files/MATLAB/R2022b/bin:/mnt/c/Program Files/Microsoft SQL Server/130/Tools/Binn/:/mnt/c/Program Files/nodejs:/mnt/c/Users/35239/AppData/Local/Huawei/ohpm/bin:/mnt/d/Program Files/Java/jdk-17/bin:/mnt/d/MinGW64/mingw64/mingw-w64-v11.0.0/mingw-w64-crt/crt:/mnt/c/Users/35239/AppData/Local/Programs/Python/Launcher/:/mnt/c/Users/35239/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/35239/AppData/Roaming/npm:/mnt/d/Microsoft VS Code/bin:/mnt/d/Program Files/JetBrains/IntelliJ IDEA Community Edition 2024.3.4/bin:/mnt/d/Program Files/JetBrains/IntelliJ IDEA 2024.3.4/bin:/mnt/c/Users/35239/AppData/Local/Microsoft/WindowsApps:/mnt/d/Program Files/OpenSSL-Win64/bin:/mnt/d/GlobalNodeModules:/mnt/d/JetBrains Gateway 2025.2.3/bin:/mnt/d/Users/35239/AppData/Local/Programs/MiKTeX/miktex/bin/x64/:/mnt/d/Users/35239/AppData/Local/Programs/Antigravity/bin:/snap/bin:/home/grok/.vscode-server/extensions/openai.chatgpt-26.313.41514-linux-x64/bin/linux-x86_64', 'WT_SESSION': 'd9cc5504-70c2-421f-9c8f-7b5faba54608', 'XDG_RUNTIME_DIR': '/run/user/1000/', 'MAMBA_ROOT_PREFIX': '/home/grok/.local/share/mamba', 'DISPLAY': ':0', 'LANG': 'C.UTF-8', 'GH_PAGER': 'cat', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.avif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*~=00;90:*#=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:', 'AMENT_PREFIX_PATH': '/opt/ros/jazzy', 'SHELL': '/bin/bash', 'ELECTRON_RUN_AS_NODE': '1', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'CODEX_THREAD_ID': '019d0ff9-f985-7d10-9cc6-c0be1ea00960', 'MAMBA_EXE': '/home/grok/miniforge3/bin/mamba', 'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET', 'GIT_PAGER': 'cat', 'PWD': '/home/grok/ros2_ws/build/marl_nav2_plugins', 'LC_ALL': 'C.UTF-8', 'XDG_DATA_DIRS': '/usr/local/share:/usr/share:/var/lib/snapd/desktop', 'PYTHONPATH': '/opt/ros/jazzy/lib/python3.12/site-packages', 'COLCON': '1', 'WSL2_GUI_APPS_ENABLED': '1', 'HOSTTYPE': 'x86_64', 'CMAKE_PREFIX_PATH': '/opt/ros/jazzy/opt/gz_sim_vendor:/opt/ros/jazzy/opt/gz_sensors_vendor:/opt/ros/jazzy/opt/gz_physics_vendor:/opt/ros/jazzy/opt/sdformat_vendor:/opt/ros/jazzy/opt/gz_gui_vendor:/opt/ros/jazzy/opt/gz_transport_vendor:/opt/ros/jazzy/opt/gz_rendering_vendor:/opt/ros/jazzy/opt/gz_plugin_vendor:/opt/ros/jazzy/opt/gz_fuel_tools_vendor:/opt/ros/jazzy/opt/gz_msgs_vendor:/opt/ros/jazzy/opt/gz_common_vendor:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_tools_vendor:/opt/ros/jazzy/opt/gz_ogre_next_vendor:/opt/ros/jazzy/opt/gz_dartsim_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy', 'WSLENV': 'ELECTRON_RUN_AS_NODE/w:WT_SESSION:WT_PROFILE_ID:'}), 'shell': False}
+[0.099346] (-) TimerEvent: {}
+[0.199632] (-) TimerEvent: {}
+[0.299886] (-) TimerEvent: {}
+[0.400143] (-) TimerEvent: {}
+[0.500424] (-) TimerEvent: {}
+[0.600723] (-) TimerEvent: {}
+[0.640263] (marl_nav2_plugins) StdoutLine: {'line': b'-- The C compiler identification is GNU 13.3.0\n'}
+[0.700939] (-) TimerEvent: {}
+[0.801311] (-) TimerEvent: {}
+[0.901697] (-) TimerEvent: {}
+[1.002033] (-) TimerEvent: {}
+[1.102309] (-) TimerEvent: {}
+[1.202541] (-) TimerEvent: {}
+[1.302870] (-) TimerEvent: {}
+[1.403184] (-) TimerEvent: {}
+[1.503435] (-) TimerEvent: {}
+[1.603637] (-) TimerEvent: {}
+[1.703838] (-) TimerEvent: {}
+[1.804141] (-) TimerEvent: {}
+[1.904432] (-) TimerEvent: {}
+[2.004701] (-) TimerEvent: {}
+[2.104964] (-) TimerEvent: {}
+[2.205159] (-) TimerEvent: {}
+[2.305361] (-) TimerEvent: {}
+[2.405565] (-) TimerEvent: {}
+[2.505790] (-) TimerEvent: {}
+[2.606087] (-) TimerEvent: {}
+[2.706465] (-) TimerEvent: {}
+[2.806921] (-) TimerEvent: {}
+[2.907163] (-) TimerEvent: {}
+[3.007464] (-) TimerEvent: {}
+[3.107963] (-) TimerEvent: {}
+[3.208252] (-) TimerEvent: {}
+[3.231478] (marl_nav2_plugins) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 13.3.0\n'}
+[3.308546] (-) TimerEvent: {}
+[3.408904] (-) TimerEvent: {}
+[3.509252] (-) TimerEvent: {}
+[3.609551] (-) TimerEvent: {}
+[3.709778] (-) TimerEvent: {}
+[3.810124] (-) TimerEvent: {}
+[3.910643] (-) TimerEvent: {}
+[4.011150] (-) TimerEvent: {}
+[4.111417] (-) TimerEvent: {}
+[4.211673] (-) TimerEvent: {}
+[4.311969] (-) TimerEvent: {}
+[4.412202] (-) TimerEvent: {}
+[4.512505] (-) TimerEvent: {}
+[4.612850] (-) TimerEvent: {}
+[4.713164] (-) TimerEvent: {}
+[4.813480] (-) TimerEvent: {}
+[4.913731] (-) TimerEvent: {}
+[5.013990] (-) TimerEvent: {}
+[5.114317] (-) TimerEvent: {}
+[5.214747] (-) TimerEvent: {}
+[5.315120] (-) TimerEvent: {}
+[5.415444] (-) TimerEvent: {}
+[5.515705] (-) TimerEvent: {}
+[5.615921] (-) TimerEvent: {}
+[5.716178] (-) TimerEvent: {}
+[5.816520] (-) TimerEvent: {}
+[5.916853] (-) TimerEvent: {}
+[6.017284] (-) TimerEvent: {}
+[6.117556] (-) TimerEvent: {}
+[6.217820] (-) TimerEvent: {}
+[6.286297] (marl_nav2_plugins) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[6.317973] (-) TimerEvent: {}
+[6.418279] (-) TimerEvent: {}
+[6.518586] (-) TimerEvent: {}
+[6.618881] (-) TimerEvent: {}
+[6.719123] (-) TimerEvent: {}
+[6.819318] (-) TimerEvent: {}
+[6.919605] (-) TimerEvent: {}
+[7.019959] (-) TimerEvent: {}
+[7.120227] (-) TimerEvent: {}
+[7.220428] (-) TimerEvent: {}
+[7.320677] (-) TimerEvent: {}
+[7.335086] (marl_nav2_plugins) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[7.341680] (marl_nav2_plugins) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[7.343084] (marl_nav2_plugins) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[7.345024] (marl_nav2_plugins) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[7.420879] (-) TimerEvent: {}
+[7.521196] (-) TimerEvent: {}
+[7.621489] (-) TimerEvent: {}
+[7.721810] (-) TimerEvent: {}
+[7.737800] (marl_nav2_plugins) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[7.821966] (-) TimerEvent: {}
+[7.922250] (-) TimerEvent: {}
+[8.022514] (-) TimerEvent: {}
+[8.122788] (-) TimerEvent: {}
+[8.223098] (-) TimerEvent: {}
+[8.323333] (-) TimerEvent: {}
+[8.423713] (-) TimerEvent: {}
+[8.524152] (-) TimerEvent: {}
+[8.624441] (-) TimerEvent: {}
+[8.724747] (-) TimerEvent: {}
+[8.825293] (-) TimerEvent: {}
+[8.893248] (marl_nav2_plugins) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[8.900104] (marl_nav2_plugins) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[8.900400] (marl_nav2_plugins) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[8.900643] (marl_nav2_plugins) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[8.925390] (-) TimerEvent: {}
+[8.934337] (marl_nav2_plugins) StdoutLine: {'line': b'-- Found ament_cmake: 2.5.5 (/opt/ros/jazzy/share/ament_cmake/cmake)\n'}
+[9.025577] (-) TimerEvent: {}
+[9.082863] (marl_nav2_plugins) StdoutLine: {'line': b'-- Found Python3: /home/grok/miniforge3/bin/python3 (found version "3.12.11") found components: Interpreter \n'}
+[9.125747] (-) TimerEvent: {}
+[9.226184] (-) TimerEvent: {}
+[9.254981] (marl_nav2_plugins) StdoutLine: {'line': b'-- Found rclcpp: 28.1.16 (/opt/ros/jazzy/share/rclcpp/cmake)\n'}
+[9.326306] (-) TimerEvent: {}
+[9.426567] (-) TimerEvent: {}
+[9.526835] (-) TimerEvent: {}
+[9.627287] (-) TimerEvent: {}
+[9.727783] (-) TimerEvent: {}
+[9.828176] (-) TimerEvent: {}
+[9.928570] (-) TimerEvent: {}
+[10.029039] (-) TimerEvent: {}
+[10.049032] (marl_nav2_plugins) StdoutLine: {'line': b'-- Found rosidl_generator_c: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)\n'}
+[10.067686] (marl_nav2_plugins) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)\n'}
+[10.091580] (marl_nav2_plugins) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[10.114250] (marl_nav2_plugins) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[10.129192] (-) TimerEvent: {}
+[10.226461] (marl_nav2_plugins) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)\n'}
+[10.229275] (-) TimerEvent: {}
+[10.230622] (marl_nav2_plugins) StdoutLine: {'line': b'-- Found rmw_fastrtps_cpp: 8.4.3 (/opt/ros/jazzy/share/rmw_fastrtps_cpp/cmake)\n'}
+[10.329430] (-) TimerEvent: {}
+[10.350671] (marl_nav2_plugins) StdoutLine: {'line': b'-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.13")  \n'}
+[10.429596] (-) TimerEvent: {}
+[10.529812] (-) TimerEvent: {}
+[10.630048] (-) TimerEvent: {}
+[10.730245] (-) TimerEvent: {}
+[10.830459] (-) TimerEvent: {}
+[10.930678] (-) TimerEvent: {}
+[11.004792] (marl_nav2_plugins) StdoutLine: {'line': b'-- Found FastRTPS: /opt/ros/jazzy/include (Required is at least version "2.13") \n'}
+[11.030873] (-) TimerEvent: {}
+[11.131154] (-) TimerEvent: {}
+[11.231537] (-) TimerEvent: {}
+[11.331960] (-) TimerEvent: {}
+[11.425891] (marl_nav2_plugins) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_fastrtps_cpp' as default\n"}
+[11.432011] (-) TimerEvent: {}
+[11.532199] (-) TimerEvent: {}
+[11.632455] (-) TimerEvent: {}
+[11.732878] (-) TimerEvent: {}
+[11.833312] (-) TimerEvent: {}
+[11.933802] (-) TimerEvent: {}
+[12.034040] (-) TimerEvent: {}
+[12.124799] (marl_nav2_plugins) StdoutLine: {'line': b'-- Found pluginlib: 5.4.4 (/opt/ros/jazzy/share/pluginlib/cmake)\n'}
+[12.134164] (-) TimerEvent: {}
+[12.234472] (-) TimerEvent: {}
+[12.334813] (-) TimerEvent: {}
+[12.435088] (-) TimerEvent: {}
+[12.535402] (-) TimerEvent: {}
+[12.635718] (-) TimerEvent: {}
+[12.736019] (-) TimerEvent: {}
+[12.836383] (-) TimerEvent: {}
+[12.936774] (-) TimerEvent: {}
+[13.037147] (-) TimerEvent: {}
+[13.137479] (-) TimerEvent: {}
+[13.237865] (-) TimerEvent: {}
+[13.338273] (-) TimerEvent: {}
+[13.438700] (-) TimerEvent: {}
+[13.538993] (-) TimerEvent: {}
+[13.639205] (-) TimerEvent: {}
+[13.739513] (-) TimerEvent: {}
+[13.839880] (-) TimerEvent: {}
+[13.940114] (-) TimerEvent: {}
+[14.040598] (-) TimerEvent: {}
+[14.140922] (-) TimerEvent: {}
+[14.241195] (-) TimerEvent: {}
+[14.341514] (-) TimerEvent: {}
+[14.441784] (-) TimerEvent: {}
+[14.542429] (-) TimerEvent: {}
+[14.642793] (-) TimerEvent: {}
+[14.743080] (-) TimerEvent: {}
+[14.843373] (-) TimerEvent: {}
+[14.943732] (-) TimerEvent: {}
+[15.044078] (-) TimerEvent: {}
+[15.144337] (-) TimerEvent: {}
+[15.244679] (-) TimerEvent: {}
+[15.345018] (-) TimerEvent: {}
+[15.445410] (-) TimerEvent: {}
+[15.545777] (-) TimerEvent: {}
+[15.646186] (-) TimerEvent: {}
+[15.746476] (-) TimerEvent: {}
+[15.846847] (-) TimerEvent: {}
+[15.947122] (-) TimerEvent: {}
+[16.047500] (-) TimerEvent: {}
+[16.147710] (-) TimerEvent: {}
+[16.248029] (-) TimerEvent: {}
+[16.348253] (-) TimerEvent: {}
+[16.448575] (-) TimerEvent: {}
+[16.549040] (-) TimerEvent: {}
+[16.649340] (-) TimerEvent: {}
+[16.749597] (-) TimerEvent: {}
+[16.849892] (-) TimerEvent: {}
+[16.950101] (-) TimerEvent: {}
+[17.050319] (-) TimerEvent: {}
+[17.150529] (-) TimerEvent: {}
+[17.186340] (marl_nav2_plugins) StderrLine: {'line': b'CMake Error at CMakeLists.txt:11 (find_package):\n'}
+[17.186552] (marl_nav2_plugins) StderrLine: {'line': b'  By not providing "Findnav2_costmap_2d.cmake" in CMAKE_MODULE_PATH this\n'}
+[17.186602] (marl_nav2_plugins) StderrLine: {'line': b'  project has asked CMake to find a package configuration file provided by\n'}
+[17.186636] (marl_nav2_plugins) StderrLine: {'line': b'  "nav2_costmap_2d", but CMake did not find one.\n'}
+[17.186666] (marl_nav2_plugins) StderrLine: {'line': b'\n'}
+[17.186696] (marl_nav2_plugins) StderrLine: {'line': b'  Could not find a package configuration file provided by "nav2_costmap_2d"\n'}
+[17.186727] (marl_nav2_plugins) StderrLine: {'line': b'  with any of the following names:\n'}
+[17.186757] (marl_nav2_plugins) StderrLine: {'line': b'\n'}
+[17.186786] (marl_nav2_plugins) StderrLine: {'line': b'    nav2_costmap_2dConfig.cmake\n'}
+[17.186816] (marl_nav2_plugins) StderrLine: {'line': b'    nav2_costmap_2d-config.cmake\n'}
+[17.186845] (marl_nav2_plugins) StderrLine: {'line': b'\n'}
+[17.186873] (marl_nav2_plugins) StderrLine: {'line': b'  Add the installation prefix of "nav2_costmap_2d" to CMAKE_PREFIX_PATH or\n'}
+[17.186900] (marl_nav2_plugins) StderrLine: {'line': b'  set "nav2_costmap_2d_DIR" to a directory containing one of the above files.\n'}
+[17.186933] (marl_nav2_plugins) StderrLine: {'line': b'  If "nav2_costmap_2d" provides a separate development package or SDK, be\n'}
+[17.186962] (marl_nav2_plugins) StderrLine: {'line': b'  sure it has been installed.\n'}
+[17.186989] (marl_nav2_plugins) StderrLine: {'line': b'\n'}
+[17.187016] (marl_nav2_plugins) StderrLine: {'line': b'\n'}
+[17.187043] (marl_nav2_plugins) StdoutLine: {'line': b'-- Configuring incomplete, errors occurred!\n'}
+[17.195830] (marl_nav2_plugins) CommandEnded: {'returncode': 1}
+[17.221487] (marl_nav2_plugins) JobEnded: {'identifier': 'marl_nav2_plugins', 'rc': 1}
+[17.222456] (-) EventReactorShutdown: {}

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from pathlib import Path
 from dataclasses import dataclass, asdict
 from typing import Dict, List
 
@@ -18,6 +19,10 @@ class MetricsReport:
     success_rate: float
     env_change_trigger_failures: int
     replanning_count: int
+    mode_switch_count: int = 0
+    no_progress_count: int = 0
+    recovery_start_count: int = 0
+    recovery_success_rate: float = 0.0
 
 
 def _median(values: List[float]) -> float:
@@ -52,7 +57,7 @@ def compute_metrics(db_path: str) -> MetricsReport:
                 success += 1
         if et == "task_failed" and "world" in json.dumps(p.get("details", {}), ensure_ascii=True):
             env_fail += 1
-        if et == "replanned":
+        if et in ("replanned", "replan_requested"):
             replanning += 1
         handoff.append(float(p.get("latency_ms", 0.0)))
 
@@ -96,17 +101,64 @@ def compute_metrics(db_path: str) -> MetricsReport:
     )
 
 
+def apply_timeline_metrics(report: MetricsReport, timeline_jsonl: str) -> MetricsReport:
+    p = Path(timeline_jsonl)
+    if not p.exists():
+        return report
+
+    mode_switch = 0
+    no_progress = 0
+    recovery_start = 0
+    recovery_end_ok = 0
+
+    with p.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                evt = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(evt, dict):
+                continue
+            et = str(evt.get("event_type", ""))
+            ph = str(evt.get("event_phase", ""))
+            if et == "mode_switch":
+                mode_switch += 1
+            if et == "no_progress" and ph == "start":
+                no_progress += 1
+            if et == "recovery" and ph == "start":
+                recovery_start += 1
+            if et == "recovery" and ph == "end":
+                details = evt.get("details", {})
+                if isinstance(details, dict) and bool(details.get("effective", False)):
+                    recovery_end_ok += 1
+
+    report.mode_switch_count = int(mode_switch)
+    report.no_progress_count = int(no_progress)
+    report.recovery_start_count = int(recovery_start)
+    report.recovery_success_rate = float(recovery_end_ok / recovery_start) if recovery_start > 0 else 0.0
+    return report
+
+
 def main() -> None:
     import argparse
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--db", required=True, help="Path to monitor SQLite db")
+    parser.add_argument(
+        "--timeline-events",
+        default="",
+        help="Optional path to monitor_timeline_event.jsonl for replay metrics",
+    )
     args = parser.parse_args()
 
     report = compute_metrics(args.db)
+    if args.timeline_events:
+        report = apply_timeline_metrics(report, args.timeline_events)
     print(json.dumps(asdict(report), ensure_ascii=True, indent=2))
 
 
 if __name__ == "__main__":
     main()
-

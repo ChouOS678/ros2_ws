@@ -1,0 +1,41 @@
+[0.639s] Invoking command in '/home/grok/ros2_ws/build/marl_car_ros2': PYTHONPATH=/home/grok/ros2_ws/build/marl_car_ros2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/grok/ros2_ws/install/marl_car_ros2/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/grok/ros2_ws/build/marl_car_ros2/build --no-deps symlink_data --force
+[0.852s] running develop
+[0.972s] running egg_info
+[0.984s] writing marl_car_ros2.egg-info/PKG-INFO
+[0.985s] writing dependency_links to marl_car_ros2.egg-info/dependency_links.txt
+[0.985s] writing entry points to marl_car_ros2.egg-info/entry_points.txt
+[0.985s] writing requirements to marl_car_ros2.egg-info/requires.txt
+[0.985s] writing top-level names to marl_car_ros2.egg-info/top_level.txt
+[1.012s] reading manifest file 'marl_car_ros2.egg-info/SOURCES.txt'
+[1.013s] writing manifest file 'marl_car_ros2.egg-info/SOURCES.txt'
+[1.026s] running build_ext
+[1.026s] Creating /home/grok/ros2_ws/install/marl_car_ros2/lib/python3.12/site-packages/marl-car-ros2.egg-link (link to .)
+[1.027s] Installing baseline_nav_node script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.027s] Installing dummy_joint_runner script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.027s] Installing evaluation_metrics script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.028s] Installing monitor_logger script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.028s] Installing multi_agent_game script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.028s] Installing nav_tf_bridge script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.028s] Installing scenario_mutator script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.028s] Installing supervisor_node script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.029s] Installing task_agent script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.029s] Installing train_rllib script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.029s] Installing world_model_mutator script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.029s] 
+[1.029s] Installed /home/grok/ros2_ws/build/marl_car_ros2
+[1.029s] running symlink_data
+[1.029s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/resource/marl_car_ros2 -> /home/grok/ros2_ws/install/marl_car_ros2/share/ament_index/resource_index/packages
+[1.030s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/package.xml -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2
+[1.030s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/launch/marl_stack_minimal.launch.py -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/launch
+[1.030s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/launch/baseline_nav2.launch.py -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/launch
+[1.031s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/launch/evaluation.launch.py -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/launch
+[1.031s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/launch/sim.launch.py -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/launch
+[1.031s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/launch/agent_nav2.launch.py -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/launch
+[1.032s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/launch/nav2_visualization.launch.py -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/launch
+[1.032s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/launch/marl_stack.launch.py -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/launch
+[1.032s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/config/nav2_params.yaml -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/config
+[1.032s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/rviz/nav2_default.rviz -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/rviz
+[1.033s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/worlds/minimal.world -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/worlds
+[1.033s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/models/simple_marl_car/model.config -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/models/simple_marl_car
+[1.033s] symbolically linking /home/grok/ros2_ws/build/marl_car_ros2/models/simple_marl_car/model.sdf -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/models/simple_marl_car
+[1.061s] Invoked command in '/home/grok/ros2_ws/build/marl_car_ros2' returned '0': PYTHONPATH=/home/grok/ros2_ws/build/marl_car_ros2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/grok/ros2_ws/install/marl_car_ros2/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/grok/ros2_ws/build/marl_car_ros2/build --no-deps symlink_data --force

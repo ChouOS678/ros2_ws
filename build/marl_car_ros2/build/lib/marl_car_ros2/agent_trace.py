@@ -9,6 +9,8 @@ from typing import Dict, List, Optional
 
 import rclpy
 
+from .shared_types import SCHEMA_VERSION_V1
+
 
 class AgentState(str, Enum):
     IDLE = "idle"
@@ -58,6 +60,11 @@ class AgentStatusPayload:
     wall_time: float
     robot_pose: Dict[str, float]
     world_state_summary: Dict[str, float]
+    schema_version: str = SCHEMA_VERSION_V1
+    robot_mode: str = ""
+    risk_level: str = ""
+    block_reason_code: str = ""
+    block_reason_detail: str = ""
 
     def to_json(self) -> str:
         return json.dumps(self.__dict__, ensure_ascii=True)
@@ -82,7 +89,11 @@ class AgentEventPayload:
     details: Dict[str, object]
     sim_time: float
     wall_time: float
+    schema_version: str = SCHEMA_VERSION_V1
+    supervisor_decision: str = ""
+    risk_level: str = ""
+    block_reason_code: str = ""
+    recovery_reason_code: str = ""
 
     def to_json(self) -> str:
         return json.dumps(self.__dict__, ensure_ascii=True)
-

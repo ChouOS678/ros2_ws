@@ -1,0 +1,32 @@
+[0.971s] Invoking command in '/home/grok/ros2_ws/src/marl_car_ros2': PYTHONPATH=/home/grok/ros2_ws/build/marl_car_ros2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/grok/ros2_ws/install/marl_car_ros2/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/marl_car_ros2 build --build-base /home/grok/ros2_ws/build/marl_car_ros2/build install --record /home/grok/ros2_ws/build/marl_car_ros2/install.log --single-version-externally-managed install_data
+[1.273s] running egg_info
+[1.294s] writing ../../build/marl_car_ros2/marl_car_ros2.egg-info/PKG-INFO
+[1.294s] writing dependency_links to ../../build/marl_car_ros2/marl_car_ros2.egg-info/dependency_links.txt
+[1.295s] writing entry points to ../../build/marl_car_ros2/marl_car_ros2.egg-info/entry_points.txt
+[1.295s] writing requirements to ../../build/marl_car_ros2/marl_car_ros2.egg-info/requires.txt
+[1.295s] writing top-level names to ../../build/marl_car_ros2/marl_car_ros2.egg-info/top_level.txt
+[1.340s] reading manifest file '../../build/marl_car_ros2/marl_car_ros2.egg-info/SOURCES.txt'
+[1.341s] writing manifest file '../../build/marl_car_ros2/marl_car_ros2.egg-info/SOURCES.txt'
+[1.342s] running build
+[1.342s] running build_py
+[1.342s] running install
+[1.349s] running install_lib
+[1.372s] running install_data
+[1.372s] copying launch/nav2_visualization.launch.py -> /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/launch
+[1.372s] running install_egg_info
+[1.397s] removing '/home/grok/ros2_ws/install/marl_car_ros2/lib/python3.12/site-packages/marl_car_ros2-0.1.0-py3.12.egg-info' (and everything under it)
+[1.398s] Copying ../../build/marl_car_ros2/marl_car_ros2.egg-info to /home/grok/ros2_ws/install/marl_car_ros2/lib/python3.12/site-packages/marl_car_ros2-0.1.0-py3.12.egg-info
+[1.399s] running install_scripts
+[1.541s] Installing baseline_nav_node script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.542s] Installing dummy_joint_runner script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.543s] Installing evaluation_metrics script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.543s] Installing monitor_logger script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.544s] Installing multi_agent_game script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.544s] Installing nav_tf_bridge script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.544s] Installing scenario_mutator script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.544s] Installing supervisor_node script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.545s] Installing task_agent script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.545s] Installing train_rllib script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.545s] Installing world_model_mutator script to /home/grok/ros2_ws/install/marl_car_ros2/lib/marl_car_ros2
+[1.545s] writing list of installed files to '/home/grok/ros2_ws/build/marl_car_ros2/install.log'
+[1.598s] Invoked command in '/home/grok/ros2_ws/src/marl_car_ros2' returned '0': PYTHONPATH=/home/grok/ros2_ws/build/marl_car_ros2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/grok/ros2_ws/install/marl_car_ros2/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/marl_car_ros2 build --build-base /home/grok/ros2_ws/build/marl_car_ros2/build install --record /home/grok/ros2_ws/build/marl_car_ros2/install.log --single-version-externally-managed install_data

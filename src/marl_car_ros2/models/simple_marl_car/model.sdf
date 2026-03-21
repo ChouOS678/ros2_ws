@@ -17,9 +17,9 @@
           <iyz>0.0</iyz>
         </inertia>
       </inertial>
-      <collision name="base_collision">
+      <collision name="base_collision_main">
         <geometry>
-          <box><size>0.45 0.32 0.18</size></box>
+          <box><size>0.30 0.30 0.14</size></box>
         </geometry>
         <surface>
           <friction>
@@ -30,13 +30,66 @@
           </friction>
         </surface>
       </collision>
-      <visual name="base_visual">
+      <collision name="base_collision_front">
+        <pose>0.16 0 0 0 0 0</pose>
         <geometry>
-          <box><size>0.45 0.32 0.18</size></box>
+          <box><size>0.12 0.26 0.12</size></box>
+        </geometry>
+      </collision>
+      <collision name="base_collision_rear">
+        <pose>-0.15 0 0 0 0 0</pose>
+        <geometry>
+          <box><size>0.10 0.26 0.12</size></box>
+        </geometry>
+      </collision>
+      <visual name="base_visual">
+        <pose>0 0 -0.01 0 0 0</pose>
+        <geometry>
+          <box><size>0.50 0.34 0.14</size></box>
         </geometry>
         <material>
           <ambient>0.2 0.6 0.8 1.0</ambient>
           <diffuse>0.2 0.6 0.8 1.0</diffuse>
+        </material>
+      </visual>
+      <visual name="cabin_visual">
+        <pose>0.02 0 0.10 0 0 0</pose>
+        <geometry>
+          <box><size>0.30 0.24 0.08</size></box>
+        </geometry>
+        <material>
+          <ambient>0.08 0.08 0.1 1.0</ambient>
+          <diffuse>0.08 0.08 0.1 1.0</diffuse>
+        </material>
+      </visual>
+      <visual name="front_nose_visual">
+        <pose>0.24 0 -0.01 0 0 0</pose>
+        <geometry>
+          <box><size>0.04 0.30 0.10</size></box>
+        </geometry>
+        <material>
+          <ambient>0.95 0.80 0.20 1.0</ambient>
+          <diffuse>0.95 0.80 0.20 1.0</diffuse>
+        </material>
+      </visual>
+      <visual name="rear_panel_visual">
+        <pose>-0.25 0 -0.01 0 0 0</pose>
+        <geometry>
+          <box><size>0.03 0.30 0.10</size></box>
+        </geometry>
+        <material>
+          <ambient>0.2 0.2 0.2 1.0</ambient>
+          <diffuse>0.2 0.2 0.2 1.0</diffuse>
+        </material>
+      </visual>
+      <visual name="heading_strip_visual">
+        <pose>0.14 0 0.145 0 0 0</pose>
+        <geometry>
+          <box><size>0.18 0.03 0.01</size></box>
+        </geometry>
+        <material>
+          <ambient>0.95 0.80 0.20 1.0</ambient>
+          <diffuse>0.95 0.80 0.20 1.0</diffuse>
         </material>
       </visual>
     </link>
@@ -106,7 +159,7 @@
     </link>
 
     <link name="lidar_link">
-      <pose>0.12 0 0.18 0 0 0</pose>
+      <pose>0.16 0 0.16 0 0 0</pose>
       <collision name="lidar_collision">
         <geometry>
           <cylinder>

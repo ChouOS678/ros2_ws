@@ -1,0 +1,45 @@
+[0.017s] Invoking command in '/home/grok/ros2_ws/build/marl_nav2_plugins': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake /home/grok/ros2_ws/src/marl_nav2_plugins -DCMAKE_INSTALL_PREFIX=/home/grok/ros2_ws/install/marl_nav2_plugins
+[0.640s] -- The C compiler identification is GNU 13.3.0
+[3.231s] -- The CXX compiler identification is GNU 13.3.0
+[6.286s] -- Detecting C compiler ABI info
+[7.335s] -- Detecting C compiler ABI info - done
+[7.341s] -- Check for working C compiler: /usr/bin/cc - skipped
+[7.343s] -- Detecting C compile features
+[7.345s] -- Detecting C compile features - done
+[7.737s] -- Detecting CXX compiler ABI info
+[8.893s] -- Detecting CXX compiler ABI info - done
+[8.900s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[8.900s] -- Detecting CXX compile features
+[8.900s] -- Detecting CXX compile features - done
+[8.934s] -- Found ament_cmake: 2.5.5 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[9.083s] -- Found Python3: /home/grok/miniforge3/bin/python3 (found version "3.12.11") found components: Interpreter 
+[9.255s] -- Found rclcpp: 28.1.16 (/opt/ros/jazzy/share/rclcpp/cmake)
+[10.049s] -- Found rosidl_generator_c: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+[10.067s] -- Found rosidl_generator_cpp: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+[10.091s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[10.114s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[10.226s] -- Found rmw_implementation_cmake: 7.3.3 (/opt/ros/jazzy/share/rmw_implementation_cmake/cmake)
+[10.230s] -- Found rmw_fastrtps_cpp: 8.4.3 (/opt/ros/jazzy/share/rmw_fastrtps_cpp/cmake)
+[10.350s] -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.13")  
+[11.005s] -- Found FastRTPS: /opt/ros/jazzy/include (Required is at least version "2.13") 
+[11.426s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[12.124s] -- Found pluginlib: 5.4.4 (/opt/ros/jazzy/share/pluginlib/cmake)
+[17.186s] CMake Error at CMakeLists.txt:11 (find_package):
+[17.186s]   By not providing "Findnav2_costmap_2d.cmake" in CMAKE_MODULE_PATH this
+[17.186s]   project has asked CMake to find a package configuration file provided by
+[17.186s]   "nav2_costmap_2d", but CMake did not find one.
+[17.186s] 
+[17.186s]   Could not find a package configuration file provided by "nav2_costmap_2d"
+[17.186s]   with any of the following names:
+[17.186s] 
+[17.186s]     nav2_costmap_2dConfig.cmake
+[17.186s]     nav2_costmap_2d-config.cmake
+[17.186s] 
+[17.186s]   Add the installation prefix of "nav2_costmap_2d" to CMAKE_PREFIX_PATH or
+[17.186s]   set "nav2_costmap_2d_DIR" to a directory containing one of the above files.
+[17.187s]   If "nav2_costmap_2d" provides a separate development package or SDK, be
+[17.187s]   sure it has been installed.
+[17.187s] 
+[17.187s] 
+[17.187s] -- Configuring incomplete, errors occurred!
+[17.196s] Invoked command in '/home/grok/ros2_ws/build/marl_nav2_plugins' returned '1': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake /home/grok/ros2_ws/src/marl_nav2_plugins -DCMAKE_INSTALL_PREFIX=/home/grok/ros2_ws/install/marl_nav2_plugins

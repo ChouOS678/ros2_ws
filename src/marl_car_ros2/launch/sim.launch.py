@@ -14,9 +14,24 @@ def generate_launch_description() -> LaunchDescription:
     start_bridge = LaunchConfiguration("start_bridge")
     start_monitor = LaunchConfiguration("start_monitor")
     start_mutator = LaunchConfiguration("start_mutator")
+    world_file = LaunchConfiguration("world_file")
+    spawn_x = LaunchConfiguration("spawn_x")
+    spawn_y = LaunchConfiguration("spawn_y")
+    spawn_z = LaunchConfiguration("spawn_z")
+    spawn_yaw = LaunchConfiguration("spawn_yaw")
+    enable_deterministic_obstacle = LaunchConfiguration("enable_deterministic_obstacle")
+    dynamic_obstacle_mode = LaunchConfiguration("dynamic_obstacle_mode")
+    dynamic_obstacle_cmd_topic = LaunchConfiguration("dynamic_obstacle_cmd_topic")
+    dynamic_obstacle_speed_mps = LaunchConfiguration("dynamic_obstacle_speed_mps")
+    dynamic_obstacle_trigger_mode = LaunchConfiguration("dynamic_obstacle_trigger_mode")
+    dynamic_obstacle_trigger_time_s = LaunchConfiguration("dynamic_obstacle_trigger_time_s")
+    dynamic_obstacle_trigger_robot_x = LaunchConfiguration("dynamic_obstacle_trigger_robot_x")
+    dynamic_obstacle_crossing_span_m = LaunchConfiguration("dynamic_obstacle_crossing_span_m")
+    dynamic_obstacle_initial_direction = LaunchConfiguration("dynamic_obstacle_initial_direction")
+    dynamic_obstacle_repeat = LaunchConfiguration("dynamic_obstacle_repeat")
 
     pkg_share = get_package_share_directory("marl_car_ros2")
-    world_path = os.path.join(pkg_share, "worlds", "minimal.world")
+    default_world_path = os.path.join(pkg_share, "worlds", "minimal.world")
     model_path = os.path.join(pkg_share, "models", "simple_marl_car", "model.sdf")
 
     gazebo_backend_info = LogInfo(msg="Using Gazebo Sim backend via ros_gz_sim (Jazzy default).")
@@ -25,7 +40,7 @@ def generate_launch_description() -> LaunchDescription:
         PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory("ros_gz_sim"), "launch", "gz_sim.launch.py")
         ),
-        launch_arguments={"gz_args": f"-r {world_path}"}.items(),
+        launch_arguments={"gz_args": ["-r ", world_file]}.items(),
         condition=IfCondition(start_gazebo),
     )
 
@@ -36,9 +51,10 @@ def generate_launch_description() -> LaunchDescription:
         launch_arguments={
             "file": model_path,
             "entity_name": "simple_marl_car",
-            "x": "0.0",
-            "y": "0.0",
-            "z": "0.1",
+            "x": spawn_x,
+            "y": spawn_y,
+            "z": spawn_z,
+            "yaw": spawn_yaw,
         }.items(),
         condition=IfCondition(start_gazebo),
     )
@@ -50,6 +66,7 @@ def generate_launch_description() -> LaunchDescription:
         arguments=[
             "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
             "/model/simple_marl_car/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
+            [dynamic_obstacle_cmd_topic, "@geometry_msgs/msg/Twist]gz.msgs.Twist"],
             "/model/simple_marl_car/odometry@nav_msgs/msg/Odometry[gz.msgs.Odometry",
             "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
         ],
@@ -65,7 +82,21 @@ def generate_launch_description() -> LaunchDescription:
         executable="scenario_mutator",
         name="scenario_mutator",
         output="screen",
-        parameters=[{"use_sim_time": use_sim_time}],
+        parameters=[
+            {
+                "use_sim_time": use_sim_time,
+                "enable_deterministic_obstacle": enable_deterministic_obstacle,
+                "dynamic_obstacle_mode": dynamic_obstacle_mode,
+                "dynamic_obstacle_cmd_topic": dynamic_obstacle_cmd_topic,
+                "dynamic_obstacle_speed_mps": dynamic_obstacle_speed_mps,
+                "dynamic_obstacle_trigger_mode": dynamic_obstacle_trigger_mode,
+                "dynamic_obstacle_trigger_time_s": dynamic_obstacle_trigger_time_s,
+                "dynamic_obstacle_trigger_robot_x": dynamic_obstacle_trigger_robot_x,
+                "dynamic_obstacle_crossing_span_m": dynamic_obstacle_crossing_span_m,
+                "dynamic_obstacle_initial_direction": dynamic_obstacle_initial_direction,
+                "dynamic_obstacle_repeat": dynamic_obstacle_repeat,
+            }
+        ],
         condition=IfCondition(start_mutator),
     )
 
@@ -85,6 +116,21 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("start_bridge", default_value="true"),
             DeclareLaunchArgument("start_monitor", default_value="true"),
             DeclareLaunchArgument("start_mutator", default_value="true"),
+            DeclareLaunchArgument("world_file", default_value=default_world_path),
+            DeclareLaunchArgument("spawn_x", default_value="0.0"),
+            DeclareLaunchArgument("spawn_y", default_value="0.0"),
+            DeclareLaunchArgument("spawn_z", default_value="0.1"),
+            DeclareLaunchArgument("spawn_yaw", default_value="0.0"),
+            DeclareLaunchArgument("enable_deterministic_obstacle", default_value="false"),
+            DeclareLaunchArgument("dynamic_obstacle_mode", default_value="crossing_deterministic"),
+            DeclareLaunchArgument("dynamic_obstacle_cmd_topic", default_value="/model/dynamic_crossing_box/cmd_vel"),
+            DeclareLaunchArgument("dynamic_obstacle_speed_mps", default_value="0.45"),
+            DeclareLaunchArgument("dynamic_obstacle_trigger_mode", default_value="time_after_start"),
+            DeclareLaunchArgument("dynamic_obstacle_trigger_time_s", default_value="4.0"),
+            DeclareLaunchArgument("dynamic_obstacle_trigger_robot_x", default_value="2.0"),
+            DeclareLaunchArgument("dynamic_obstacle_crossing_span_m", default_value="1.6"),
+            DeclareLaunchArgument("dynamic_obstacle_initial_direction", default_value="1.0"),
+            DeclareLaunchArgument("dynamic_obstacle_repeat", default_value="true"),
             gazebo_backend_info,
             gazebo,
             TimerAction(period=2.0, actions=[spawn_entity]),
