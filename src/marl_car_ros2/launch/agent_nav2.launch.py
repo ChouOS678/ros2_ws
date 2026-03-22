@@ -16,6 +16,7 @@ def generate_launch_description() -> LaunchDescription:
     start_bridge = LaunchConfiguration("start_bridge")
     start_monitor = LaunchConfiguration("start_monitor")
     start_nav2 = LaunchConfiguration("start_nav2")
+    start_nav_tf_bridge = LaunchConfiguration("start_nav_tf_bridge")
     start_nav_executor = LaunchConfiguration("start_nav_executor")
     start_task_agent = LaunchConfiguration("start_task_agent")
     start_supervisor = LaunchConfiguration("start_supervisor")
@@ -114,6 +115,22 @@ def generate_launch_description() -> LaunchDescription:
         condition=IfCondition(start_nav_executor),
     )
 
+    nav_tf_bridge = Node(
+        package="marl_car_ros2",
+        executable="nav_tf_bridge",
+        name="nav_tf_bridge",
+        output="screen",
+        parameters=[
+            {
+                "use_sim_time": use_sim_time,
+                "publish_laser_tf": True,
+                "use_msg_frame_ids": False,
+                "use_msg_stamp": False,
+            }
+        ],
+        condition=IfCondition(start_nav_tf_bridge),
+    )
+
     task_agent = Node(
         package="marl_car_ros2",
         executable="task_agent",
@@ -140,6 +157,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("start_bridge", default_value="true"),
             DeclareLaunchArgument("start_monitor", default_value="true"),
             DeclareLaunchArgument("start_nav2", default_value=start_nav2_default),
+            DeclareLaunchArgument("start_nav_tf_bridge", default_value="true"),
             DeclareLaunchArgument("autostart", default_value="true"),
             DeclareLaunchArgument(
                 "world_file",
@@ -171,6 +189,7 @@ def generate_launch_description() -> LaunchDescription:
             sim,
             *missing_pkgs_info,
             *( [nav2_group] if nav2_group is not None else [] ),
+            nav_tf_bridge,
             nav_executor,
             task_agent,
             supervisor,

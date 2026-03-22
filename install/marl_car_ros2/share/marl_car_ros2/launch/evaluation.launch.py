@@ -27,6 +27,7 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
     start_bridge = LaunchConfiguration("start_bridge").perform(context)
     start_monitor = LaunchConfiguration("start_monitor").perform(context)
     planner_profile = LaunchConfiguration("planner_profile").perform(context)
+    params_file = LaunchConfiguration("params_file").perform(context).strip()
     run_id = LaunchConfiguration("run_id").perform(context)
 
     world_file = LaunchConfiguration("world_file").perform(context)
@@ -82,6 +83,13 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
             )
             dynamic_obstacle_repeat = str(dyn_cfg.get("repeat", dynamic_obstacle_repeat)).lower()
 
+    if not params_file:
+        profile = planner_profile.strip().lower()
+        if profile in ("rpp", "regulated_pure_pursuit", "regulated-pure-pursuit"):
+            params_file = os.path.join(pkg_share, "config", "nav2_params_rpp.yaml")
+        else:
+            params_file = os.path.join(pkg_share, "config", "nav2_params.yaml")
+
     env_actions = [
         SetEnvironmentVariable("MARL_EXPERIMENT_SCENARIO", scenario_name or "custom"),
         SetEnvironmentVariable("MARL_EXPERIMENT_WORLD_FILE", world_file),
@@ -126,6 +134,7 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
             PythonLaunchDescriptionSource(os.path.join(launch_dir, "agent_nav2.launch.py")),
             launch_arguments={
                 **common_args,
+                "params_file": params_file,
                 "start_nav2": "true",
                 "start_nav_executor": "false",
                 "start_task_agent": "true",
@@ -159,6 +168,7 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("agent_mode", default_value="true"),
             DeclareLaunchArgument("scenario_name", default_value="custom"),
             DeclareLaunchArgument("planner_profile", default_value="unspecified"),
+            DeclareLaunchArgument("params_file", default_value=""),
             DeclareLaunchArgument("run_id", default_value=""),
             DeclareLaunchArgument(
                 "world_file",

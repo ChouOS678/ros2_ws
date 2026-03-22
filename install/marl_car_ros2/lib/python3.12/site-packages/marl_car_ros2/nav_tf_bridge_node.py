@@ -26,6 +26,8 @@ class NavTfBridgeNode(Node):
         self.declare_parameter("laser_pitch", 0.0)
         self.declare_parameter("laser_yaw", 0.0)
         self.declare_parameter("publish_laser_tf", True)
+        self.declare_parameter("use_msg_frame_ids", False)
+        self.declare_parameter("use_msg_stamp", False)
 
         self.odom_frame = str(self.get_parameter("odom_frame").value)
         self.base_frame = str(self.get_parameter("base_frame").value)
@@ -35,6 +37,8 @@ class NavTfBridgeNode(Node):
         self.static_tf_broadcaster = StaticTransformBroadcaster(self)
 
         self.publish_laser_tf = bool(self.get_parameter("publish_laser_tf").value)
+        self.use_msg_frame_ids = bool(self.get_parameter("use_msg_frame_ids").value)
+        self.use_msg_stamp = bool(self.get_parameter("use_msg_stamp").value)
         if self.publish_laser_tf:
             self._publish_static_laser_tf()
 
@@ -66,7 +70,7 @@ class NavTfBridgeNode(Node):
     def _on_odom(self, msg: Odometry) -> None:
         t = TransformStamped()
 
-        if msg.header.stamp.sec == 0 and msg.header.stamp.nanosec == 0:
+        if not self.use_msg_stamp or (msg.header.stamp.sec == 0 and msg.header.stamp.nanosec == 0):
             t.header.stamp = self.get_clock().now().to_msg()
         else:
             t.header.stamp = msg.header.stamp
@@ -74,8 +78,12 @@ class NavTfBridgeNode(Node):
         header_frame = msg.header.frame_id.strip()
         child_frame = msg.child_frame_id.strip()
 
-        t.header.frame_id = header_frame if header_frame else self.odom_frame
-        t.child_frame_id = child_frame if child_frame else self.base_frame
+        if self.use_msg_frame_ids:
+            t.header.frame_id = header_frame if header_frame else self.odom_frame
+            t.child_frame_id = child_frame if child_frame else self.base_frame
+        else:
+            t.header.frame_id = self.odom_frame
+            t.child_frame_id = self.base_frame
         t.transform.translation.x = msg.pose.pose.position.x
         t.transform.translation.y = msg.pose.pose.position.y
         t.transform.translation.z = msg.pose.pose.position.z

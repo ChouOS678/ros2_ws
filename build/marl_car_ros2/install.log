@@ -58,6 +58,7 @@
 /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/launch/baseline_world_narrow.launch.py
 /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/config/nav2_params.yaml
 /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/config/baseline_world_scenarios.yaml
+/home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/config/nav2_params_rpp.yaml
 /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/rviz/nav2_default.rviz
 /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/urdf/simple_marl_car.urdf
 /home/grok/ros2_ws/install/marl_car_ros2/share/marl_car_ros2/worlds/baseline_sharp_turns.world

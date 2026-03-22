@@ -10,6 +10,7 @@ setup.py
 ../../build/marl_car_ros2/marl_car_ros2.egg-info/zip-safe
 config/baseline_world_scenarios.yaml
 config/nav2_params.yaml
+config/nav2_params_rpp.yaml
 launch/agent_nav2.launch.py
 launch/baseline_nav2.launch.py
 launch/baseline_world_dynamic.launch.py
