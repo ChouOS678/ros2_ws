@@ -9,15 +9,15 @@ set -euo pipefail
 #   ./wsl2_demo_ctl.sh test [SECONDS]
 #
 # Notes:
-# - "up" does: hard cleanup -> build -> launch demo (start_game:=true) -> readiness checks
+# - "up" does: hard cleanup -> build -> launch benchmark demo entry -> readiness checks
 # - "down" does: stop tracked launch + aggressive process cleanup + shm cleanup
 
 WS_ROOT="/home/grok/ros2_ws"
 ROS_SETUP="/opt/ros/jazzy/setup.bash"
 WS_SETUP="$WS_ROOT/install/setup.bash"
 PKG="marl_car_ros2"
-LAUNCH_FILE="marl_stack_minimal.launch.py"
-LAUNCH_ARGS="start_game:=true"
+LAUNCH_FILE="benchmark_demo.launch.py"
+LAUNCH_ARGS=""
 
 RUN_DIR="/tmp/wsl2_demo"
 PID_FILE="$RUN_DIR/launch.pid"
@@ -51,9 +51,10 @@ hard_cleanup() {
 
   # Aggressive cleanup for Gazebo/ROS residue in WSL2
   pkill -9 -f "ros2 launch $PKG $LAUNCH_FILE" 2>/dev/null || true
-  pkill -9 -f "/$PKG/multi_agent_game" 2>/dev/null || true
-  pkill -9 -f "/$PKG/world_model_mutator" 2>/dev/null || true
+  pkill -9 -f "/$PKG/benchmark_gui" 2>/dev/null || true
+  pkill -9 -f "/$PKG/benchmark_visualizer" 2>/dev/null || true
   pkill -9 -f "/$PKG/monitor_logger" 2>/dev/null || true
+  pkill -9 -f "/$PKG/supervisor_node" 2>/dev/null || true
   pkill -9 -f "ros_gz_bridge/parameter_bridge" 2>/dev/null || true
 
   pkill -9 -f gazebo 2>/dev/null || true
@@ -130,7 +131,7 @@ status() {
 
   log "process snapshot:"
   ps -eo pid,ppid,stat,cmd \
-    | rg -n "marl_stack_minimal.launch.py|multi_agent_game|world_model_mutator|monitor_logger|parameter_bridge|gz sim server|gazebo" -S \
+    | rg -n "benchmark_demo.launch.py|benchmark_gui|benchmark_visualizer|monitor_logger|supervisor_node|parameter_bridge|gz sim server|gazebo" -S \
     || true
 
   log "ROS nodes snapshot:"

@@ -3,18 +3,14 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, Opaq
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
+from marl_car_ros2.benchmark_config import (
+    load_benchmark_defaults,
+    load_scenarios,
+    resolve_controller_profile,
+    resolve_nav2_params_file,
+    resolve_pkg_path,
+)
 import os
-import yaml
-
-
-def _load_baseline_scenarios(pkg_share: str) -> dict:
-    cfg_path = os.path.join(pkg_share, "config", "baseline_world_scenarios.yaml")
-    with open(cfg_path, "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f) or {}
-    scenarios = data.get("scenarios", {})
-    if not isinstance(scenarios, dict):
-        return {}
-    return scenarios
 
 
 def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict):
@@ -27,6 +23,7 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
     start_bridge = LaunchConfiguration("start_bridge").perform(context)
     start_monitor = LaunchConfiguration("start_monitor").perform(context)
     planner_profile = LaunchConfiguration("planner_profile").perform(context)
+    controller_profile = LaunchConfiguration("controller_profile").perform(context).strip()
     params_file = LaunchConfiguration("params_file").perform(context).strip()
     run_id = LaunchConfiguration("run_id").perform(context)
 
@@ -83,12 +80,9 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
             )
             dynamic_obstacle_repeat = str(dyn_cfg.get("repeat", dynamic_obstacle_repeat)).lower()
 
-    if not params_file:
-        profile = planner_profile.strip().lower()
-        if profile in ("rpp", "regulated_pure_pursuit", "regulated-pure-pursuit"):
-            params_file = os.path.join(pkg_share, "config", "nav2_params_rpp.yaml")
-        else:
-            params_file = os.path.join(pkg_share, "config", "nav2_params.yaml")
+    controller_profile = resolve_controller_profile(controller_profile, planner_profile)
+
+    params_file = resolve_nav2_params_file(pkg_share, planner_profile, params_file)
 
     env_actions = [
         SetEnvironmentVariable("MARL_EXPERIMENT_SCENARIO", scenario_name or "custom"),
@@ -101,6 +95,7 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
         SetEnvironmentVariable("MARL_EXPERIMENT_GOAL_Y", goal_y),
         SetEnvironmentVariable("MARL_EXPERIMENT_AGENT_MODE", "true" if agent_mode else "false"),
         SetEnvironmentVariable("MARL_EXPERIMENT_PLANNER_PROFILE", planner_profile),
+        SetEnvironmentVariable("MARL_EXPERIMENT_CONTROLLER_PROFILE", controller_profile),
         SetEnvironmentVariable("MARL_EXPERIMENT_RUN_ID", run_id),
     ]
 
@@ -135,6 +130,8 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
             launch_arguments={
                 **common_args,
                 "params_file": params_file,
+                "controller_profile": controller_profile,
+                "benchmark_mode": "true",
                 "start_nav2": "true",
                 "start_nav_executor": "false",
                 "start_task_agent": "true",
@@ -156,7 +153,14 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
 def generate_launch_description() -> LaunchDescription:
     pkg_share = get_package_share_directory("marl_car_ros2")
     launch_dir = os.path.join(pkg_share, "launch")
-    scenarios = _load_baseline_scenarios(pkg_share)
+    defaults = load_benchmark_defaults(pkg_share)
+    scenarios = load_scenarios(pkg_share)
+    spawn_defaults = defaults.get("spawn", {}) if isinstance(defaults.get("spawn", {}), dict) else {}
+    goal_defaults = defaults.get("goal", {}) if isinstance(defaults.get("goal", {}), dict) else {}
+    dynamic_defaults = (
+        defaults.get("dynamic_obstacle", {}) if isinstance(defaults.get("dynamic_obstacle", {}), dict) else {}
+    )
+    default_world_file = resolve_pkg_path(pkg_share, str(defaults.get("world_file", "")), fallback="worlds/minimal.world")
 
     return LaunchDescription(
         [
@@ -165,31 +169,29 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("start_mutator", default_value="true"),
             DeclareLaunchArgument("start_bridge", default_value="true"),
             DeclareLaunchArgument("start_monitor", default_value="true"),
-            DeclareLaunchArgument("agent_mode", default_value="true"),
-            DeclareLaunchArgument("scenario_name", default_value="custom"),
-            DeclareLaunchArgument("planner_profile", default_value="unspecified"),
+            DeclareLaunchArgument("agent_mode", default_value=str(bool(defaults.get("agent_mode", True))).lower()),
+            DeclareLaunchArgument("scenario_name", default_value=str(defaults.get("scenario_name", "narrow_corridor"))),
+            DeclareLaunchArgument("planner_profile", default_value=str(defaults.get("planner_profile", "unspecified"))),
+            DeclareLaunchArgument("controller_profile", default_value=str(defaults.get("controller_profile", ""))),
             DeclareLaunchArgument("params_file", default_value=""),
             DeclareLaunchArgument("run_id", default_value=""),
-            DeclareLaunchArgument(
-                "world_file",
-                default_value=os.path.join(pkg_share, "worlds", "minimal.world"),
-            ),
-            DeclareLaunchArgument("spawn_x", default_value="0.0"),
-            DeclareLaunchArgument("spawn_y", default_value="0.0"),
-            DeclareLaunchArgument("spawn_z", default_value="0.1"),
-            DeclareLaunchArgument("spawn_yaw", default_value="0.0"),
-            DeclareLaunchArgument("goal_x", default_value="8.0"),
-            DeclareLaunchArgument("goal_y", default_value="0.0"),
-            DeclareLaunchArgument("enable_deterministic_obstacle", default_value="false"),
-            DeclareLaunchArgument("dynamic_obstacle_mode", default_value="crossing_deterministic"),
-            DeclareLaunchArgument("dynamic_obstacle_cmd_topic", default_value="/model/dynamic_crossing_box/cmd_vel"),
-            DeclareLaunchArgument("dynamic_obstacle_speed_mps", default_value="0.45"),
-            DeclareLaunchArgument("dynamic_obstacle_trigger_mode", default_value="time_after_start"),
-            DeclareLaunchArgument("dynamic_obstacle_trigger_time_s", default_value="4.0"),
-            DeclareLaunchArgument("dynamic_obstacle_trigger_robot_x", default_value="2.0"),
-            DeclareLaunchArgument("dynamic_obstacle_crossing_span_m", default_value="1.6"),
-            DeclareLaunchArgument("dynamic_obstacle_initial_direction", default_value="1.0"),
-            DeclareLaunchArgument("dynamic_obstacle_repeat", default_value="true"),
+            DeclareLaunchArgument("world_file", default_value=default_world_file),
+            DeclareLaunchArgument("spawn_x", default_value=str(spawn_defaults.get("x", 0.0))),
+            DeclareLaunchArgument("spawn_y", default_value=str(spawn_defaults.get("y", 0.0))),
+            DeclareLaunchArgument("spawn_z", default_value=str(spawn_defaults.get("z", 0.0))),
+            DeclareLaunchArgument("spawn_yaw", default_value=str(spawn_defaults.get("yaw", 0.0))),
+            DeclareLaunchArgument("goal_x", default_value=str(goal_defaults.get("x", 8.0))),
+            DeclareLaunchArgument("goal_y", default_value=str(goal_defaults.get("y", 0.0))),
+            DeclareLaunchArgument("enable_deterministic_obstacle", default_value=str(bool(dynamic_defaults.get("enable", False))).lower()),
+            DeclareLaunchArgument("dynamic_obstacle_mode", default_value=str(dynamic_defaults.get("mode", "crossing_deterministic"))),
+            DeclareLaunchArgument("dynamic_obstacle_cmd_topic", default_value=str(dynamic_defaults.get("cmd_topic", "/model/dynamic_crossing_box/cmd_vel"))),
+            DeclareLaunchArgument("dynamic_obstacle_speed_mps", default_value=str(dynamic_defaults.get("speed_mps", 0.45))),
+            DeclareLaunchArgument("dynamic_obstacle_trigger_mode", default_value=str(dynamic_defaults.get("trigger_mode", "time_after_start"))),
+            DeclareLaunchArgument("dynamic_obstacle_trigger_time_s", default_value=str(dynamic_defaults.get("trigger_time_s", 4.0))),
+            DeclareLaunchArgument("dynamic_obstacle_trigger_robot_x", default_value=str(dynamic_defaults.get("trigger_robot_x", 2.0))),
+            DeclareLaunchArgument("dynamic_obstacle_crossing_span_m", default_value=str(dynamic_defaults.get("crossing_span_m", 1.6))),
+            DeclareLaunchArgument("dynamic_obstacle_initial_direction", default_value=str(dynamic_defaults.get("initial_direction", 1.0))),
+            DeclareLaunchArgument("dynamic_obstacle_repeat", default_value=str(bool(dynamic_defaults.get("repeat", True))).lower()),
             OpaqueFunction(function=lambda context: _build_eval_stack(context, pkg_share, launch_dir, scenarios)),
         ]
     )

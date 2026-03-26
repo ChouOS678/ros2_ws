@@ -1,0 +1,40 @@
+{
+  "benchmark_defaults": {
+    "scenario_name": "narrow_corridor",
+    "agent_mode": true,
+    "planner_profile": "unspecified",
+    "controller_profile": "",
+    "benchmark_mode": true,
+    "world_file": "worlds/minimal.world",
+    "spawn": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0,
+      "yaw": 0.0
+    },
+    "goal": {
+      "x": 8.0,
+      "y": 0.0
+    },
+    "dynamic_obstacle": {
+      "enable": false,
+      "mode": "crossing_deterministic",
+      "cmd_topic": "/model/dynamic_crossing_box/cmd_vel",
+      "speed_mps": 0.45,
+      "trigger_mode": "time_after_start",
+      "trigger_time_s": 4.0,
+      "trigger_robot_x": 2.0,
+      "crossing_span_m": 1.6,
+      "initial_direction": 1.0,
+      "repeat": true
+    }
+  },
+  "demo_defaults": {
+    "world_name": "minimal",
+    "benchmark_mode": false,
+    "start_rviz": true,
+    "start_gui": true,
+    "start_visualizer": true,
+    "rviz_config": "rviz/benchmark.rviz"
+  }
+}

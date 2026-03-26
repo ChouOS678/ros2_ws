@@ -1,0 +1,81 @@
+scenarios:
+  narrow_corridor:
+    tag: baseline_narrow_corridor
+    world_file: worlds/baseline_narrow_corridor.world
+    benchmark:
+      suite: narrow_corridor
+      result_group: primary
+      objective: tracking_safety
+      centerline:
+        axis: y
+        value: 0.0
+      scrape_min_clearance_m: 0.08
+    spawn:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      yaw: 0.0
+    goal:
+      x: 8.0
+      y: 0.0
+    notes: "Corridor width ~0.55m with local offset narrowing."
+
+  sharp_turns:
+    tag: baseline_sharp_turns
+    world_file: worlds/baseline_sharp_turns.world
+    benchmark:
+      suite: sharp_turns
+      result_group: primary
+      objective: high_curvature_tracking
+      reference_path:
+        - {x: 0.0, y: 0.0}
+        - {x: 2.8, y: 0.0}
+        - {x: 2.8, y: 2.2}
+        - {x: 0.8, y: 2.2}
+        - {x: 0.8, y: 0.2}
+        - {x: 3.8, y: 0.2}
+      turn_windows:
+        - {x_min: 2.1, x_max: 3.5, y_min: -0.2, y_max: 1.8, name: l_turn}
+        - {x_min: 0.0, x_max: 1.7, y_min: 0.3, y_max: 2.5, name: hairpin_return}
+      cmd_constraints:
+        max_linear_x: 0.8
+        max_angular_z: 1.2
+    spawn:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      yaw: 0.0
+    goal:
+      x: 3.8
+      y: 0.2
+    notes: "Includes one L-turn and one hairpin-like U-turn return section."
+
+  dynamic_crossing:
+    tag: baseline_dynamic_crossing
+    world_file: worlds/baseline_dynamic_crossing.world
+    benchmark:
+      suite: dynamic_obstacle
+      result_group: extension
+      objective: dynamic_disturbance_robustness
+      stop_speed_threshold_mps: 0.05
+      event_type: dynamic_obstacle_triggered
+    spawn:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      yaw: 0.0
+    goal:
+      x: 8.0
+      y: 0.0
+    dynamic_obstacle:
+      enable: true
+      mode: crossing_deterministic
+      cmd_topic: /model/dynamic_crossing_box/cmd_vel
+      speed_mps: 0.45
+      trigger_mode: time_after_start
+      trigger_time_s: 4.0
+      trigger_robot_x: 2.0
+      crossing_span_m: 1.6
+      initial_direction: 1.0
+      repeat: true
+    notes: "Single deterministic moving box crosses the robot path using TrajectoryFollower."
