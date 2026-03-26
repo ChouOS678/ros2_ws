@@ -1,68 +1,91 @@
 # AGENTS.md
 
 ## Current project status
-- This project is currently a research platform skeleton, not yet a fully completed benchmark platform.
-- Do not assume planned features are already implemented.
-- The active Nav2 controller may still be DWB unless the repository clearly shows otherwise.
-- Frontend experiment presentation may still be incomplete:
-  - robot model
-  - Gazebo/RViz visibility
-  - baseline worlds
-- Do not describe planned work as already complete.
+- This repository is a ROS 2 + Nav2 benchmark platform with a converged dual-path structure:
+  - formal benchmark backbone
+  - manual demo / debug chain
+- The formal benchmark backbone is:
+  - `evaluation.launch.py`
+  - `monitor_logger`
+  - `evaluation_metrics`
+- The manual demo / debug chain is:
+  - `benchmark_demo.launch.py`
+  - `benchmark_gui`
+  - `benchmark_visualizer`
+- Do not assume planned features beyond what the repository currently shows.
+- Do not describe demo/debug tooling as the formal benchmark result path.
 
-## Recent engineering updates (2026-03-22)
-- Nav2 controller profile switching is implemented in `evaluation.launch.py`:
-  - `planner_profile:=rpp` maps to `config/nav2_params_rpp.yaml`
-  - default/other profiles map to `config/nav2_params.yaml` (DWB baseline path)
-  - optional explicit `params_file` override is supported
-- RPP profile file is present (`config/nav2_params_rpp.yaml`) and uses
-  `nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController`.
-- Minimal compatibility fixes already applied in Nav2 params:
-  - behavior plugin naming aligned to `nav2_behaviors::...`
-  - `collision_monitor` minimal required parameters added
-  - minimal docking plugin section added for `docking_server`
-  - costmap size numeric typing corrected for startup compatibility
-- TF and visualization stabilization updates:
-  - `nav_tf_bridge` is launched in `agent_nav2.launch.py`
-  - `nav_tf_bridge_node` supports stable configured-frame publishing
-    (`use_msg_frame_ids`, `use_msg_stamp`)
-  - RViz default fixed frame/target frame moved to `odom` in
-    `rviz/nav2_default.rviz` to reduce `Message Filter queue full` under odom-mode
-- Current global-frame mode in local experiments has been set to odom-centric
-  (`bt_navigator` / `global_costmap` using `odom`) for stack continuity when
-  no stable `map->odom` chain exists.
+## Recent engineering updates (2026-03-26)
+- Benchmark entrypoints were converged to exactly two public paths:
+  - formal: `evaluation.launch.py`
+  - manual demo/debug: `benchmark_demo.launch.py`
+- Historical duplicate launch entrypoints were removed:
+  - `marl_stack.launch.py`
+  - `marl_stack_minimal.launch.py`
+  - `nav2_visualization.launch.py`
+  - `baseline_world_narrow.launch.py`
+  - `baseline_world_turns.launch.py`
+  - `baseline_world_dynamic.launch.py`
+- A single benchmark default parameter source was added:
+  - `config/benchmark_defaults.yaml`
+- Shared benchmark/demo config loading was centralized in:
+  - `marl_car_ros2/benchmark_config.py`
+- Scenario registration remains centralized in:
+  - `config/baseline_world_scenarios.yaml`
+- Scenario categories are now explicitly organized as:
+  - high curvature / sharp turns
+  - narrow passage
+  - dynamic obstacle extension
+- `evaluation.launch.py` remains the only formal scenario-based benchmark entrypoint.
+- `benchmark_demo.launch.py` is explicitly a debug/demo tool entrypoint and is not the formal metrics source.
+- `wsl2_demo_ctl.sh` now launches `benchmark_demo.launch.py`.
+- `auto_eval_pipeline.py` was removed as a historical coupled path superseded by the converged structure.
 
-## Current validation status (as observed, not ideal target)
-- Full chain process startup is available (Gazebo bridge + Nav2 + supervisor + monitor + mutator),
-  but lifecycle stability is not yet consistently clean.
-- In recent comparative runs (DWB x3, RPP x3), runs were mostly recorded as
-  `mission_completion_status=degraded`, with starvation risk recurring and
-  limited evidence of effective navigation progression.
-- Therefore, the platform is suitable for integration/debug pre-experiments,
-  but not yet ready for formal algorithm benchmark claims.
-- Recommended gate before formal algorithm experiments:
+## Benchmark configuration rules
+- Use `config/benchmark_defaults.yaml` as the single default parameter source for:
+  - default benchmark scenario
+  - planner/controller profile defaults
+  - default world/spawn/goal values
+  - default dynamic obstacle parameters
+  - default benchmark-mode semantics
+- Use `config/baseline_world_scenarios.yaml` as the single scenario registration source.
+- If default values differ between files, treat `benchmark_defaults.yaml` and `baseline_world_scenarios.yaml` as the source of truth, then fix the launch code or docs.
+- `planner_profile:=rpp` still maps to `config/nav2_params_rpp.yaml`.
+- default/other profiles still map to `config/nav2_params.yaml`.
+- optional explicit `params_file` override is still supported.
+
+## Current validation status
+- The formal benchmark backbone is available for scenario-based evaluation runs and result generation.
+- The manual demo/debug chain is available for interactive verification, visualization, and integration debugging.
+- Lifecycle stability and run quality should still be validated before making strong comparative claims.
+- Recommended gate for formal comparison campaigns:
   - 3 consecutive runs with no Nav2 lifecycle transition failures
   - 3 consecutive runs with non-degraded mission completion
-  - repeatable comparable navigation outcomes (not only safety override dominance)
+  - repeatable comparable navigation outcomes across the same scenario/profile inputs
 
 ## Module responsibilities
 - supervisor: final /cmd_vel arbitration and safety gating
 - task_agent / mode_manager: high-level mode decision only
 - baseline_nav_node: baseline / fallback only
-- monitor_logger: experiment logging and timeline capture
-- scenario_mutator / evaluation: experiment setup and reproducible benchmarking
+- monitor_logger: formal benchmark logging and timeline capture
+- evaluation_metrics: formal benchmark result computation
+- benchmark_gui / benchmark_visualizer: manual demo/debug tooling only
+- scenario_mutator / evaluation: experiment setup and reproducible scenario benchmarking
 
 ## Documentation rules
 - Clearly distinguish implemented, partially implemented, and planned work.
 - If code and docs disagree, prefer the code state.
-- Avoid marketing-style wording; use engineering-status wording.
+- Use engineering-status wording, not marketing wording.
+- Describe the formal benchmark backbone and the manual demo/debug chain separately.
+- Do not describe deleted historical entrypoints as still supported.
 
 ## Frontend experiment rules
 - Preserve or improve Gazebo/RViz visibility of robot, paths, TF, and costmaps.
 - Prefer lightweight, reproducible experiment assets over decorative complexity.
+- Keep demo/debug frontend tooling out of formal benchmark semantics.
 
 ## Repository expectations
-- This repository is a ROS 2 + Nav2 research project.
+- This repository is a ROS 2 + Nav2 benchmark research project.
 - Prefer minimal, incremental changes over broad refactors.
 - Do not rename or move files unless explicitly requested.
 - Do not change launch behavior, topic names, or message contracts unless the task explicitly asks for it.
@@ -71,6 +94,8 @@
 ## Architecture rules
 - Keep the supervisor as the final /cmd_vel authority.
 - Treat baseline_nav_node as baseline/fallback only, not the long-term primary path.
+- Keep `evaluation.launch.py` as the only formal benchmark entrypoint.
+- Keep `benchmark_demo.launch.py` as demo/debug only.
 - New navigation intelligence should prefer Nav2-native extension points:
   - controller plugin
   - costmap layer plugin

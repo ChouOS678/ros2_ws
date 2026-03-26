@@ -11,10 +11,13 @@
   <depend>rclpy</depend>
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
+  <depend>nav2_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
   <depend>std_srvs</depend>
+  <depend>visualization_msgs</depend>
   <depend>diagnostic_msgs</depend>
+  <depend>ros_gz_interfaces</depend>
   <exec_depend>gazebo_ros</exec_depend>
   <exec_depend>gazebo_msgs</exec_depend>
   <exec_depend>gazebo_plugins</exec_depend>

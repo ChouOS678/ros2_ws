@@ -1,11 +1,17 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, LogInfo
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, GroupAction, LogInfo, TimerAction
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node, SetRemap
 from ament_index_python.packages import get_package_share_directory
 from ament_index_python.packages import PackageNotFoundError
+from marl_car_ros2.benchmark_config import (
+    load_benchmark_defaults,
+    resolve_controller_profile,
+    resolve_nav2_params_file,
+    resolve_pkg_path,
+)
 import os
 
 
@@ -20,8 +26,11 @@ def generate_launch_description() -> LaunchDescription:
     start_nav_executor = LaunchConfiguration("start_nav_executor")
     start_task_agent = LaunchConfiguration("start_task_agent")
     start_supervisor = LaunchConfiguration("start_supervisor")
+    start_goal_sender = LaunchConfiguration("start_goal_sender")
     autostart = LaunchConfiguration("autostart")
     params_file = LaunchConfiguration("params_file")
+    controller_profile = LaunchConfiguration("controller_profile")
+    benchmark_mode = LaunchConfiguration("benchmark_mode")
     world_file = LaunchConfiguration("world_file")
     spawn_x = LaunchConfiguration("spawn_x")
     spawn_y = LaunchConfiguration("spawn_y")
@@ -41,6 +50,13 @@ def generate_launch_description() -> LaunchDescription:
     dynamic_obstacle_repeat = LaunchConfiguration("dynamic_obstacle_repeat")
 
     pkg_share = get_package_share_directory("marl_car_ros2")
+    defaults = load_benchmark_defaults(pkg_share)
+    spawn_defaults = defaults.get("spawn", {}) if isinstance(defaults.get("spawn", {}), dict) else {}
+    goal_defaults = defaults.get("goal", {}) if isinstance(defaults.get("goal", {}), dict) else {}
+    dynamic_defaults = (
+        defaults.get("dynamic_obstacle", {}) if isinstance(defaults.get("dynamic_obstacle", {}), dict) else {}
+    )
+    default_planner_profile = str(defaults.get("planner_profile", "unspecified"))
     start_nav2_default = "true"
     nav2_launch_path = None
     missing_pkgs_info = []
@@ -84,19 +100,24 @@ def generate_launch_description() -> LaunchDescription:
 
     nav2_group = None
     if nav2_launch_path is not None:
-        nav2_group = GroupAction(
+        nav2_group = TimerAction(
+            period=2.5,
             actions=[
-                SetRemap(src="/cmd_vel", dst="/cmd_vel_nav"),
-                IncludeLaunchDescription(
-                    PythonLaunchDescriptionSource(nav2_launch_path),
-                    launch_arguments={
-                        "use_sim_time": use_sim_time,
-                        "autostart": autostart,
-                        "params_file": params_file,
-                    }.items(),
-                ),
+                GroupAction(
+                    actions=[
+                        SetRemap(src="/cmd_vel", dst="/cmd_vel_nav"),
+                        IncludeLaunchDescription(
+                            PythonLaunchDescriptionSource(nav2_launch_path),
+                            launch_arguments={
+                                "use_sim_time": use_sim_time,
+                                "autostart": autostart,
+                                "params_file": params_file,
+                            }.items(),
+                        ),
+                    ],
+                    condition=IfCondition(start_nav2),
+                )
             ],
-            condition=IfCondition(start_nav2),
         )
 
     nav_executor = Node(
@@ -145,8 +166,33 @@ def generate_launch_description() -> LaunchDescription:
         executable="supervisor_node",
         name="supervisor_node",
         output="screen",
-        parameters=[{"use_sim_time": use_sim_time, "goal_x": goal_x, "goal_y": goal_y}],
+        parameters=[
+            {
+                "use_sim_time": use_sim_time,
+                "goal_x": goal_x,
+                "goal_y": goal_y,
+                "benchmark_mode": benchmark_mode,
+            }
+        ],
         condition=IfCondition(start_supervisor),
+    )
+
+    goal_sender = Node(
+        package="marl_car_ros2",
+        executable="nav_goal_sender",
+        name="nav_goal_sender",
+        output="screen",
+        parameters=[
+            {
+                "use_sim_time": use_sim_time,
+                "goal_x": goal_x,
+                "goal_y": goal_y,
+                "goal_frame": "odom",
+                "startup_delay_s": 4.0,
+                "controller_id": controller_profile,
+            }
+        ],
+        condition=IfCondition(start_goal_sender),
     )
 
     return LaunchDescription(
@@ -161,31 +207,40 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("autostart", default_value="true"),
             DeclareLaunchArgument(
                 "world_file",
-                default_value=os.path.join(pkg_share, "worlds", "minimal.world"),
+                default_value=resolve_pkg_path(pkg_share, str(defaults.get("world_file", "")), fallback="worlds/minimal.world"),
             ),
-            DeclareLaunchArgument("spawn_x", default_value="0.0"),
-            DeclareLaunchArgument("spawn_y", default_value="0.0"),
-            DeclareLaunchArgument("spawn_z", default_value="0.1"),
-            DeclareLaunchArgument("spawn_yaw", default_value="0.0"),
-            DeclareLaunchArgument("goal_x", default_value="8.0"),
-            DeclareLaunchArgument("goal_y", default_value="0.0"),
-            DeclareLaunchArgument("enable_deterministic_obstacle", default_value="false"),
-            DeclareLaunchArgument("dynamic_obstacle_mode", default_value="crossing_deterministic"),
-            DeclareLaunchArgument("dynamic_obstacle_cmd_topic", default_value="/model/dynamic_crossing_box/cmd_vel"),
-            DeclareLaunchArgument("dynamic_obstacle_speed_mps", default_value="0.45"),
-            DeclareLaunchArgument("dynamic_obstacle_trigger_mode", default_value="time_after_start"),
-            DeclareLaunchArgument("dynamic_obstacle_trigger_time_s", default_value="4.0"),
-            DeclareLaunchArgument("dynamic_obstacle_trigger_robot_x", default_value="2.0"),
-            DeclareLaunchArgument("dynamic_obstacle_crossing_span_m", default_value="1.6"),
-            DeclareLaunchArgument("dynamic_obstacle_initial_direction", default_value="1.0"),
-            DeclareLaunchArgument("dynamic_obstacle_repeat", default_value="true"),
+            DeclareLaunchArgument("spawn_x", default_value=str(spawn_defaults.get("x", 0.0))),
+            DeclareLaunchArgument("spawn_y", default_value=str(spawn_defaults.get("y", 0.0))),
+            DeclareLaunchArgument("spawn_z", default_value=str(spawn_defaults.get("z", 0.0))),
+            DeclareLaunchArgument("spawn_yaw", default_value=str(spawn_defaults.get("yaw", 0.0))),
+            DeclareLaunchArgument("goal_x", default_value=str(goal_defaults.get("x", 8.0))),
+            DeclareLaunchArgument("goal_y", default_value=str(goal_defaults.get("y", 0.0))),
+            DeclareLaunchArgument("enable_deterministic_obstacle", default_value=str(bool(dynamic_defaults.get("enable", False))).lower()),
+            DeclareLaunchArgument("dynamic_obstacle_mode", default_value=str(dynamic_defaults.get("mode", "crossing_deterministic"))),
+            DeclareLaunchArgument("dynamic_obstacle_cmd_topic", default_value=str(dynamic_defaults.get("cmd_topic", "/model/dynamic_crossing_box/cmd_vel"))),
+            DeclareLaunchArgument("dynamic_obstacle_speed_mps", default_value=str(dynamic_defaults.get("speed_mps", 0.45))),
+            DeclareLaunchArgument("dynamic_obstacle_trigger_mode", default_value=str(dynamic_defaults.get("trigger_mode", "time_after_start"))),
+            DeclareLaunchArgument("dynamic_obstacle_trigger_time_s", default_value=str(dynamic_defaults.get("trigger_time_s", 4.0))),
+            DeclareLaunchArgument("dynamic_obstacle_trigger_robot_x", default_value=str(dynamic_defaults.get("trigger_robot_x", 2.0))),
+            DeclareLaunchArgument("dynamic_obstacle_crossing_span_m", default_value=str(dynamic_defaults.get("crossing_span_m", 1.6))),
+            DeclareLaunchArgument("dynamic_obstacle_initial_direction", default_value=str(dynamic_defaults.get("initial_direction", 1.0))),
+            DeclareLaunchArgument("dynamic_obstacle_repeat", default_value=str(bool(dynamic_defaults.get("repeat", True))).lower()),
             DeclareLaunchArgument(
                 "params_file",
-                default_value=os.path.join(pkg_share, "config", "nav2_params.yaml"),
+                default_value=resolve_nav2_params_file(pkg_share, default_planner_profile),
             ),
+            DeclareLaunchArgument(
+                "controller_profile",
+                default_value=resolve_controller_profile(
+                    str(defaults.get("controller_profile", "")),
+                    default_planner_profile,
+                ),
+            ),
+            DeclareLaunchArgument("benchmark_mode", default_value=str(bool(defaults.get("benchmark_mode", True))).lower()),
             DeclareLaunchArgument("start_nav_executor", default_value="false"),
             DeclareLaunchArgument("start_task_agent", default_value="true"),
             DeclareLaunchArgument("start_supervisor", default_value="true"),
+            DeclareLaunchArgument("start_goal_sender", default_value="true"),
             sim,
             *missing_pkgs_info,
             *( [nav2_group] if nav2_group is not None else [] ),
@@ -193,5 +248,6 @@ def generate_launch_description() -> LaunchDescription:
             nav_executor,
             task_agent,
             supervisor,
+            goal_sender,
         ]
     )
