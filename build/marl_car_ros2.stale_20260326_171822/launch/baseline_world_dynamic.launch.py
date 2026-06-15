@@ -1,1 +1,0 @@
-/home/grok/ros2_ws/src/marl_car_ros2/launch/baseline_world_dynamic.launch.py

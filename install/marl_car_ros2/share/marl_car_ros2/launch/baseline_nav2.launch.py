@@ -1,1 +1,0 @@
-/home/grok/ros2_ws/build/marl_car_ros2/launch/baseline_nav2.launch.py

@@ -1,7 +1,0 @@
-Metadata-Version: 2.1
-Name: marl-car-ros2
-Version: 0.1.0
-Summary: AI-native node-as-agent MARL bridge for ROS2 car simulation.
-Maintainer: you
-Maintainer-email: you@example.com
-License: MIT

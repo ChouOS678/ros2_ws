@@ -1,2 +1,0 @@
-Invoking command in '/home/grok/ros2_ws/build/marl_nav2_plugins': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake /home/grok/ros2_ws/src/marl_nav2_plugins -DCMAKE_INSTALL_PREFIX=/home/grok/ros2_ws/install/marl_nav2_plugins
-Invoked command in '/home/grok/ros2_ws/build/marl_nav2_plugins' returned '1': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy /usr/bin/cmake /home/grok/ros2_ws/src/marl_nav2_plugins -DCMAKE_INSTALL_PREFIX=/home/grok/ros2_ws/install/marl_nav2_plugins

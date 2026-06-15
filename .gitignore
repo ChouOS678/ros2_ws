@@ -1,0 +1,33 @@
+# ROS 2 colcon build artifacts
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+*.so
+*.so.*
+.eggs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Gazebo
+*.log
+
+# Benchmark outputs (generated)
+br_output.json
+br_pp_sharp.json
+br_rpp.json
+br_rpp_sharp.json
+eval3.log
+
+# Temporary scripts
+tmp_*.py

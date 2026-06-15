@@ -1,0 +1,83 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code files — always use LF
+*.py text eol=lf
+*.pyx text eol=lf
+*.pxd text eol=lf
+*.cpp text eol=lf
+*.hpp text eol=lf
+*.h text eol=lf
+*.c text eol=lf
+*.cc text eol=lf
+*.hh text eol=lf
+
+# CMake / build files — LF
+CMakeLists.txt text eol=lf
+*.cmake text eol=lf
+*.cfg text eol=lf
+
+# XML / config — LF
+*.xml text eol=lf
+*.launch text eol=lf
+*.launch.py text eol=lf
+*.xacro text eol=lf
+*.urdf text eol=lf
+*.sdf text eol=lf
+
+# YAML — LF
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Markdown / documentation — LF
+*.md text eol=lf
+*.rst text eol=lf
+*.txt text eol=lf
+
+# Shell scripts — LF
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+
+# JSON — LF
+*.json text eol=lf
+*.jsonl text eol=lf
+
+# Web — LF
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+
+# ROS2 message/service/action — LF
+*.msg text eol=lf
+*.srv text eol=lf
+*.action text eol=lf
+
+# Binary files — do not modify
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.so binary
+*.so.* binary
+*.a binary
+*.pyc binary
+*.pyd binary
+*.dll binary
+*.exe binary
+*.bin binary
+*.pth binary
+*.pkl binary
+*.h5 binary
+*.bag binary
+*.db3 binary
+*.stl binary
+*.dae binary
+*.egg-link binary
+*.whl binary
+
+# Compiled Python
+*.pyc binary
+__pycache__/ binary
