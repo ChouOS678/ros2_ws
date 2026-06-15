@@ -1,0 +1,20 @@
+{
+  "cpu_affinity": {
+    "enabled": false,
+    "affinity_map": {
+      "ros_gz_bridge": "12,13",
+      "controller_server": "2,3",
+      "planner_server": "4,5",
+      "bt_navigator": "6,7",
+      "collision_monitor": "8,9",
+      "velocity_smoother": "10,11",
+      "smoother_server": "14,15",
+      "supervisor_node": "0,1"
+    },
+    "_notes": {
+      "gazebo": "Gazebo Sim is launched via ros_gz_sim/gz_sim.launch.py (external package). CPU affinity for Gazebo requires wrapping the gz server process manually, e.g.: taskset -c 0,1 gz sim ...",
+      "cores": "16 cores split into 8 groups of 2 cores each: [0,1] [2,3] [4,5] [6,7] [8,9] [10,11] [12,13] [14,15]",
+      "usage": "Set use_cpu_affinity:=true at launch, or set enabled: true in this file."
+    }
+  }
+}
