@@ -1,0 +1,12 @@
+<library path="pure_pursuit_controller">
+  <class
+    type="nav2_pure_pursuit_controller::PurePursuitController"
+    base_class_type="nav2_core::Controller">
+    <description>Basic fixed-lookahead pure pursuit controller.</description>
+  </class>
+  <class
+    type="nav2_pure_pursuit_controller::AdaptivePurePursuitController"
+    base_class_type="nav2_core::Controller">
+    <description>Velocity-scaled adaptive pure pursuit controller.</description>
+  </class>
+</library>

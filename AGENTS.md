@@ -50,7 +50,7 @@
   - default benchmark-mode semantics
 - Use `config/baseline_world_scenarios.yaml` as the single scenario registration source.
 - If default values differ between files, treat `benchmark_defaults.yaml` and `baseline_world_scenarios.yaml` as the source of truth, then fix the launch code or docs.
-- `planner_profile:=rpp` still maps to `config/nav2_params_rpp.yaml`.
+- All planner profiles use config/nav2_params.yaml; planner_profile:=rpp selects the RPP controller ID.
 - default/other profiles still map to `config/nav2_params.yaml`.
 - optional explicit `params_file` override is still supported.
 

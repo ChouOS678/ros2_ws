@@ -27,7 +27,7 @@ class BenchmarkGuiNode(Node):
         self.declare_parameter("selection_topic", "/benchmark/selection")
         self.declare_parameter("reference_input_topic", "/benchmark/reference_path_cmd")
         self.declare_parameter("clear_topic", "/benchmark/clear_trajectory")
-        self.declare_parameter("controller_ids", ["PP", "APP", "RPP", "DWPP", "DWBLegacy"])
+        self.declare_parameter("controller_ids", ["PP", "APP", "RPP", "DWPP"])
         self.declare_parameter("world_name", "minimal")
         self.declare_parameter("model_name", "simple_marl_car")
         self.declare_parameter("warp_service", "")

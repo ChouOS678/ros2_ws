@@ -13,7 +13,6 @@ def generate_launch_description() -> LaunchDescription:
     use_sim_time = LaunchConfiguration("use_sim_time")
     start_gazebo = LaunchConfiguration("start_gazebo")
     start_bridge = LaunchConfiguration("start_bridge")
-    start_scan_stamp_bridge = LaunchConfiguration("start_scan_stamp_bridge")
     start_monitor = LaunchConfiguration("start_monitor")
     start_mutator = LaunchConfiguration("start_mutator")
     world_file = LaunchConfiguration("world_file")
@@ -75,30 +74,13 @@ def generate_launch_description() -> LaunchDescription:
             "/model/simple_marl_car/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
             [dynamic_obstacle_cmd_topic, "@geometry_msgs/msg/Twist]gz.msgs.Twist"],
             "/model/simple_marl_car/odometry@nav_msgs/msg/Odometry[gz.msgs.Odometry",
-            "/scan_raw@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
+            "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
         ],
         remappings=[
             ("/model/simple_marl_car/cmd_vel", "/cmd_vel"),
             ("/model/simple_marl_car/odometry", "/odom"),
         ],
         condition=IfCondition(start_bridge),
-    )
-
-    scan_stamp_bridge = Node(
-        package="marl_car_ros2",
-        executable="scan_stamp_bridge",
-        name="scan_stamp_bridge",
-        output="screen",
-        parameters=[
-            {
-                "use_sim_time": use_sim_time,
-                "input_topic": "/scan_raw",
-                "output_topic": "/scan",
-                "output_frame": "lidar_link",
-                "restamp_with_now": True,
-            }
-        ],
-        condition=IfCondition(start_scan_stamp_bridge),
     )
 
     scenario_mutator = Node(
@@ -138,7 +120,6 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("use_sim_time", default_value="true"),
             DeclareLaunchArgument("start_gazebo", default_value="true"),
             DeclareLaunchArgument("start_bridge", default_value="true"),
-            DeclareLaunchArgument("start_scan_stamp_bridge", default_value="true"),
             DeclareLaunchArgument("start_monitor", default_value="true"),
             DeclareLaunchArgument("start_mutator", default_value="true"),
             DeclareLaunchArgument("world_file", default_value=default_world_path),
@@ -160,7 +141,6 @@ def generate_launch_description() -> LaunchDescription:
             gazebo,
             TimerAction(period=2.0, actions=[spawn_entity]),
             ros_gz_bridge,
-            scan_stamp_bridge,
             scenario_mutator,
             monitor_logger,
         ]

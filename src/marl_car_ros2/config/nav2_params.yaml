@@ -25,12 +25,10 @@ controller_server:
     # - PP   = pure pursuit
     # - APP  = adaptive pure pursuit
     # - RPP  = regulated pure pursuit
-    # - DWPP = dynamic-window pure pursuit intent
+    # - DWPP = dynamic-window controller (DWB)
     #
-    # FollowPath is kept as the default BT / ControllerSelector alias and maps to
-    # the same RPP configuration for backward compatibility.
-    # DWBLegacy is retained as an optional non-default baseline.
-    controller_plugins: [PP, APP, RPP, DWPP, FollowPath, DWBLegacy]
+    # FollowPath is retained as a compatibility alias for PP.
+    controller_plugins: [PP, APP, RPP, DWPP, FollowPath]
 
     progress_checker:
       plugin: nav2_controller::SimpleProgressChecker
@@ -45,71 +43,20 @@ controller_server:
 
     # PP: fixed lookahead, no regulation, no collision logic.
     PP:
-      plugin: nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController
+      plugin: nav2_pure_pursuit_controller::PurePursuitController
       desired_linear_vel: 0.65
       lookahead_dist: 0.8
       min_lookahead_dist: 0.35
       max_lookahead_dist: 1.2
-      lookahead_time: 1.5
-      transform_tolerance: 0.2
-      min_approach_linear_velocity: 0.08
-      approach_velocity_scaling_dist: 0.7
-      max_allowed_time_to_collision_up_to_carrot: 1.0
-      cost_scaling_dist: 0.45
-      cost_scaling_gain: 1.0
-      inflation_cost_scaling_factor: 3.0
-      regulated_linear_scaling_min_radius: 0.9
-      regulated_linear_scaling_min_speed: 0.08
-      rotate_to_heading_angular_vel: 1.0
-      rotate_to_heading_min_angle: 0.785
-      max_angular_accel: 2.0
-      use_velocity_scaled_lookahead_dist: false
-      use_regulated_linear_velocity_scaling: false
-      use_cost_regulated_linear_velocity_scaling: false
-      use_collision_detection: false
-      use_rotate_to_heading: false
-      use_fixed_curvature_lookahead: false
-      use_cancel_deceleration: false
-      allow_reversing: false
-      interpolate_curvature_after_goal: false
-      stateful: true
-      curvature_lookahead_dist: 0.6
-      cancel_deceleration: 1.8
-      max_robot_pose_search_dist: 10.0
 
     # APP: velocity-scaled lookahead only.
     APP:
-      plugin: nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController
+      plugin: nav2_pure_pursuit_controller::AdaptivePurePursuitController
       desired_linear_vel: 0.65
       lookahead_dist: 0.8
       min_lookahead_dist: 0.35
       max_lookahead_dist: 1.2
       lookahead_time: 1.5
-      transform_tolerance: 0.2
-      min_approach_linear_velocity: 0.08
-      approach_velocity_scaling_dist: 0.7
-      max_allowed_time_to_collision_up_to_carrot: 1.0
-      cost_scaling_dist: 0.45
-      cost_scaling_gain: 1.0
-      inflation_cost_scaling_factor: 3.0
-      regulated_linear_scaling_min_radius: 0.9
-      regulated_linear_scaling_min_speed: 0.08
-      rotate_to_heading_angular_vel: 1.0
-      rotate_to_heading_min_angle: 0.785
-      max_angular_accel: 2.0
-      use_velocity_scaled_lookahead_dist: true
-      use_regulated_linear_velocity_scaling: false
-      use_cost_regulated_linear_velocity_scaling: false
-      use_collision_detection: false
-      use_rotate_to_heading: false
-      use_fixed_curvature_lookahead: false
-      use_cancel_deceleration: false
-      allow_reversing: false
-      interpolate_curvature_after_goal: false
-      stateful: true
-      curvature_lookahead_dist: 0.6
-      cancel_deceleration: 1.8
-      max_robot_pose_search_dist: 10.0
 
     # RPP: regulated pure pursuit.
     RPP:
@@ -145,89 +92,17 @@ controller_server:
       cancel_deceleration: 1.8
       max_robot_pose_search_dist: 10.0
 
-    # DWPP: benchmark slot for dynamic-window pure pursuit comparison.
-    # The installed Jazzy RPP plugin exposes PP / APP / RPP parameters directly,
-    # but does not expose a use_dynamic_window parameter. This profile therefore
-    # keeps the same plugin and explicit shared velocity / acceleration limits so
-    # the route is selectable and reproducible, while true dynamic-window support
-    # still requires confirming the target Nav2 build.
+    # DWPP: Dynamic Window controller implemented by Nav2 DWB.
     DWPP:
-      plugin: nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController
-      desired_linear_vel: 0.65
-      lookahead_dist: 0.8
-      min_lookahead_dist: 0.35
-      max_lookahead_dist: 1.2
-      lookahead_time: 1.5
-      transform_tolerance: 0.2
-      min_approach_linear_velocity: 0.08
-      approach_velocity_scaling_dist: 0.7
-      max_allowed_time_to_collision_up_to_carrot: 1.0
-      cost_scaling_dist: 0.45
-      cost_scaling_gain: 1.0
-      inflation_cost_scaling_factor: 3.0
-      regulated_linear_scaling_min_radius: 0.9
-      regulated_linear_scaling_min_speed: 0.08
-      rotate_to_heading_angular_vel: 1.0
-      rotate_to_heading_min_angle: 0.785
-      max_angular_accel: 2.0
-      use_velocity_scaled_lookahead_dist: true
-      use_regulated_linear_velocity_scaling: true
-      use_cost_regulated_linear_velocity_scaling: true
-      use_collision_detection: true
-      use_rotate_to_heading: false
-      use_fixed_curvature_lookahead: false
-      use_cancel_deceleration: false
-      allow_reversing: false
-      interpolate_curvature_after_goal: false
-      stateful: true
-      curvature_lookahead_dist: 0.6
-      cancel_deceleration: 1.8
-      max_robot_pose_search_dist: 10.0
-
-    # Backward-compatible default selector alias used by the stock Nav2 BT.
-    FollowPath:
-      plugin: nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController
-      desired_linear_vel: 0.65
-      lookahead_dist: 0.8
-      min_lookahead_dist: 0.35
-      max_lookahead_dist: 1.2
-      lookahead_time: 1.5
-      transform_tolerance: 0.2
-      min_approach_linear_velocity: 0.08
-      approach_velocity_scaling_dist: 0.7
-      max_allowed_time_to_collision_up_to_carrot: 1.0
-      cost_scaling_dist: 0.45
-      cost_scaling_gain: 1.0
-      inflation_cost_scaling_factor: 3.0
-      regulated_linear_scaling_min_radius: 0.9
-      regulated_linear_scaling_min_speed: 0.08
-      rotate_to_heading_angular_vel: 1.0
-      rotate_to_heading_min_angle: 0.785
-      max_angular_accel: 2.0
-      use_velocity_scaled_lookahead_dist: true
-      use_regulated_linear_velocity_scaling: true
-      use_cost_regulated_linear_velocity_scaling: true
-      use_collision_detection: true
-      use_rotate_to_heading: false
-      use_fixed_curvature_lookahead: false
-      use_cancel_deceleration: false
-      allow_reversing: false
-      interpolate_curvature_after_goal: false
-      stateful: true
-      curvature_lookahead_dist: 0.6
-      cancel_deceleration: 1.8
-      max_robot_pose_search_dist: 10.0
-
-    # Legacy non-benchmark DWB profile retained for optional comparison only.
-    DWBLegacy:
       plugin: dwb_core::DWBLocalPlanner
       debug_trajectory_details: false
       min_vel_x: 0.0
-      max_vel_x: 0.8
+      min_vel_y: 0.0
+      max_vel_x: 0.65
       max_vel_y: 0.0
       max_vel_theta: 1.2
       min_speed_xy: 0.0
-      max_speed_xy: 0.8
+      max_speed_xy: 0.65
       min_speed_theta: 0.0
       acc_lim_x: 1.8
       acc_lim_y: 0.0
@@ -235,7 +110,7 @@ controller_server:
       decel_lim_x: -1.8
       decel_lim_y: 0.0
       decel_lim_theta: -2.0
-      vx_samples: 18
+      vx_samples: 20
       vy_samples: 1
       vtheta_samples: 20
       sim_time: 1.7
@@ -243,12 +118,12 @@ controller_server:
       angular_granularity: 0.025
       transform_tolerance: 0.2
       xy_goal_tolerance: 0.25
-      trans_stopped_velocity: 0.1
+      trans_stopped_velocity: 0.25
       short_circuit_trajectory_evaluation: true
       stateful: true
-      critics: [RotateToGoal, ObstacleFootprint, GoalAlign, PathAlign, PathDist, GoalDist]
-      ObstacleFootprint.scale: 0.02
-      PathAlign.scale: 24.0
+      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
+      BaseObstacle.scale: 0.02
+      PathAlign.scale: 32.0
       PathAlign.forward_point_distance: 0.1
       GoalAlign.scale: 24.0
       GoalAlign.forward_point_distance: 0.1
@@ -257,6 +132,14 @@ controller_server:
       RotateToGoal.scale: 32.0
       RotateToGoal.slowing_factor: 5.0
       RotateToGoal.lookahead_time: -1.0
+
+    FollowPath:
+      plugin: nav2_pure_pursuit_controller::PurePursuitController
+      desired_linear_vel: 0.65
+      lookahead_dist: 0.8
+      min_lookahead_dist: 0.35
+      max_lookahead_dist: 1.2
+
 
 global_costmap:
   global_costmap:
@@ -290,7 +173,7 @@ global_costmap:
           raytrace_min_range: 0.05
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
-        inflation_radius: 0.55
+        inflation_radius: 0.55  # 全局costmap膨胀半径
         cost_scaling_factor: 3.0
 
 local_costmap:
@@ -324,7 +207,7 @@ local_costmap:
           raytrace_min_range: 0.05
       inflation_layer:
         plugin: nav2_costmap_2d::InflationLayer
-        inflation_radius: 0.45
+        inflation_radius: 0.45  # 局部costmap膨胀半径
         cost_scaling_factor: 3.0
 
 map_server:

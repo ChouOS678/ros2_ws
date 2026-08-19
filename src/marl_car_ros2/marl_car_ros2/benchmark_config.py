@@ -43,9 +43,6 @@ def resolve_nav2_params_file(pkg_share: str, planner_profile: str, params_file: 
     explicit = str(params_file).strip()
     if explicit:
         return explicit if os.path.isabs(explicit) else os.path.join(pkg_share, explicit)
-    profile = str(planner_profile).strip().lower()
-    if profile == "rpp":
-        return os.path.join(pkg_share, "config", "nav2_params_rpp.yaml")
     return os.path.join(pkg_share, "config", "nav2_params.yaml")
 
 
@@ -71,4 +68,4 @@ def resolve_controller_profile(controller_profile: str, planner_profile: str) ->
         "dwb-legacy": "DWBLegacy",
         "followpath": "FollowPath",
     }
-    return aliases.get(str(planner_profile).strip().lower(), "FollowPath")
+    return aliases.get(str(planner_profile).strip().lower(), "PP")

@@ -27,7 +27,7 @@ class NavGoalSenderNode(Node):
         self.declare_parameter("goal_yaw", 0.0)
         self.declare_parameter("goal_frame", "odom")
         self.declare_parameter("goal_topic", "/goal_pose")
-        self.declare_parameter("controller_id", "FollowPath")
+        self.declare_parameter("controller_id", "PP")
         self.declare_parameter("controller_selector_topic", "controller_selector")
         self.declare_parameter("check_period_s", 0.5)
         self.declare_parameter("startup_delay_s", 2.0)

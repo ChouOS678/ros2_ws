@@ -111,11 +111,116 @@ Formal scenario metadata remains centralized in `src/marl_car_ros2/config/baseli
 
 Internal launch files such as `agent_nav2.launch.py`, `baseline_nav2.launch.py`, and `sim.launch.py` are still used as internal building blocks, but they are no longer documented as public benchmark entrypoints.
 
+## Sensor Bridge Contract
+
+Gazebo Harmonic laser data is bridged directly by `ros_gz_bridge`:
+
+```text
+Gazebo LaserScan -> /scan (sensor_msgs/msg/LaserScan) -> Nav2 costmaps
+```
+
+The bridge configuration is in `src/marl_car_ros2/launch/sim.launch.py`. The ROS topic is unified as `/scan`; no `/scan_raw` or self-looping `/scan` stamp bridge is used. The LaserScan message carries `frame_id: lidar_link`; TF is used by Nav2 to relate that sensor frame to `base_link`, while the scan data itself is not transformed into a different topic.
+
+The bridge also provides:
+
+- Gazebo clock to `/clock`
+- Gazebo odometry to `/odom`
+- ROS velocity commands to the simulated vehicle
+
+## Controller Implementations
+
+The controller comparison stack contains four actual controller implementations:
+
+| Controller ID | Implementation | Role |
+|---|---|---|
+| `PP` | `nav2_pure_pursuit_controller::PurePursuitController` | Fixed-lookahead pure pursuit |
+| `APP` | `nav2_pure_pursuit_controller::AdaptivePurePursuitController` | Velocity-scaled adaptive lookahead |
+| `RPP` | `nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController` | Nav2 regulated pure pursuit |
+| `DWPP` | `dwb_core::DWBLocalPlanner` | Dynamic-window controller through Nav2 DWB |
+
+The custom PP and APP plugins are implemented in:
+
+- `src/marl_nav2_plugins/include/marl_nav2_plugins/pure_pursuit_controller.hpp`
+- `src/marl_nav2_plugins/src/pure_pursuit_controller.cpp`
+- `src/marl_nav2_plugins/controller_plugins.xml`
+
+The controller instances are registered in `src/marl_car_ros2/config/nav2_params.yaml`:
+
+```yaml
+controller_plugins: [PP, APP, RPP, DWPP, FollowPath]
+```
+
+`FollowPath` is a compatibility controller ID that points to the PP plugin. The project default controller is `PP`, including the default profile resolver and goal sender. This preserves compatibility with Nav2 behavior trees that request `FollowPath`, while making PP the explicit default instance.
+
+The effective controller mapping is:
+
+```text
+PP          -> custom fixed-lookahead pure pursuit
+APP         -> custom velocity-scaled pure pursuit
+RPP         -> official Nav2 regulated pure pursuit
+DWPP        -> official Nav2 DWB dynamic-window controller
+FollowPath  -> PP
+```
+
+## Controller Parameter Rules
+
+Each controller parameter block contains only parameters supported by its implementation.
+
+PP uses:
+
+```yaml
+PP:
+  plugin: nav2_pure_pursuit_controller::PurePursuitController
+  desired_linear_vel: 0.65
+  lookahead_dist: 0.8
+  min_lookahead_dist: 0.35
+  max_lookahead_dist: 1.2
+```
+
+APP uses the same parameters plus velocity-scaled lookahead:
+
+```yaml
+APP:
+  plugin: nav2_pure_pursuit_controller::AdaptivePurePursuitController
+  desired_linear_vel: 0.65
+  lookahead_dist: 0.8
+  min_lookahead_dist: 0.35
+  max_lookahead_dist: 1.2
+  lookahead_time: 1.5
+```
+
+RPP retains the official Nav2 RPP parameters, including regulation, collision checking, cost-based speed scaling, and lookahead controls. DWPP retains the DWB velocity sampling and critic parameters.
+
+`FollowPath` has the same plugin and parameter values as `PP`. It is an alias, not a separate algorithm.
+
+The removed `nav2_params_rpp.yaml` file was a duplicate parameter preset. All profiles now use `src/marl_car_ros2/config/nav2_params.yaml`; selecting `planner_profile:=rpp` changes the controller ID to `RPP` without selecting a duplicate file.
+
+## Controller Validation
+
+The controller plugin package and the ROS 2 application package are built together:
+
+```bash
+cd /home/grok/ros2_ws
+source /opt/ros/jazzy/setup.bash
+colcon build --packages-select marl_nav2_plugins marl_car_ros2 --symlink-install
+source /home/grok/ros2_ws/install/setup.bash
+```
+
+A direct `controller_server` lifecycle configuration verified successful loading of:
+
+- `PP`
+- `APP`
+- `RPP`
+- `DWPP`
+- `FollowPath`
+
+The complete navigation launch may still depend on the separately provided `fault_tolerant_lifecycle_manager` executable.
+
 ## Build
 
 ```bash
 cd /home/grok/ros2_ws
-colcon build --packages-select marl_car_ros2
+colcon build --packages-select marl_nav2_plugins marl_car_ros2 --symlink-install
 source /opt/ros/jazzy/setup.bash
 source /home/grok/ros2_ws/install/setup.bash
 ```
