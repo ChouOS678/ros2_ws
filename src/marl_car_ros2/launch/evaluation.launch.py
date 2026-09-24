@@ -26,6 +26,7 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
     controller_profile = LaunchConfiguration("controller_profile").perform(context).strip()
     params_file = LaunchConfiguration("params_file").perform(context).strip()
     run_id = LaunchConfiguration("run_id").perform(context)
+    scenario_file = LaunchConfiguration("scenario_file").perform(context)
 
     world_file = LaunchConfiguration("world_file").perform(context)
     spawn_x = LaunchConfiguration("spawn_x").perform(context)
@@ -53,9 +54,6 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
         s = scenarios[scenario_name]
         if not isinstance(s, dict):
             raise RuntimeError(f"Scenario '{scenario_name}' config is invalid")
-        world_rel = str(s.get("world_file", ""))
-        world_file = world_rel if os.path.isabs(world_rel) else os.path.join(pkg_share, world_rel)
-
         spawn_cfg = s.get("spawn", {}) if isinstance(s.get("spawn", {}), dict) else {}
         goal_cfg = s.get("goal", {}) if isinstance(s.get("goal", {}), dict) else {}
         spawn_x = str(spawn_cfg.get("x", spawn_x))
@@ -106,6 +104,8 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
         "start_bridge": start_bridge,
         "start_monitor": start_monitor,
         "world_file": world_file,
+        "scenario_name": scenario_name,
+        "scenario_file": scenario_file,
         "spawn_x": spawn_x,
         "spawn_y": spawn_y,
         "spawn_z": spawn_z,
@@ -175,7 +175,8 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("controller_profile", default_value=str(defaults.get("controller_profile", ""))),
             DeclareLaunchArgument("params_file", default_value=""),
             DeclareLaunchArgument("run_id", default_value=""),
-            DeclareLaunchArgument("world_file", default_value=default_world_file),
+        DeclareLaunchArgument("world_file", default_value=default_world_file),
+            DeclareLaunchArgument("scenario_file", default_value=os.path.join(pkg_share, "config", "trajectory_scenarios.yaml")),
             DeclareLaunchArgument("spawn_x", default_value=str(spawn_defaults.get("x", 0.0))),
             DeclareLaunchArgument("spawn_y", default_value=str(spawn_defaults.get("y", 0.0))),
             DeclareLaunchArgument("spawn_z", default_value=str(spawn_defaults.get("z", 0.0))),

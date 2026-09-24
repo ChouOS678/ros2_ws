@@ -19,44 +19,39 @@
 - Benchmark entrypoints were converged to exactly two public paths:
   - formal: `evaluation.launch.py`
   - manual demo/debug: `benchmark_demo.launch.py`
-- Historical duplicate launch entrypoints were removed:
-  - `marl_stack.launch.py`
-  - `marl_stack_minimal.launch.py`
-  - `nav2_visualization.launch.py`
-  - `baseline_world_narrow.launch.py`
-  - `baseline_world_turns.launch.py`
-  - `baseline_world_dynamic.launch.py`
+- Historical world-based benchmark entrypoints and scenario files were removed.
 - A single benchmark default parameter source was added:
   - `config/benchmark_defaults.yaml`
 - Shared benchmark/demo config loading was centralized in:
   - `marl_car_ros2/benchmark_config.py`
-- Scenario registration remains centralized in:
-  - `config/baseline_world_scenarios.yaml`
-- Scenario categories are now explicitly organized as:
-  - high curvature / sharp turns
-  - narrow passage
-  - dynamic obstacle extension
-- `evaluation.launch.py` remains the only formal scenario-based benchmark entrypoint.
+- Trajectory registration remains centralized in:
+  - `config/trajectory_scenarios.yaml`
+- Trajectory categories are configured in `config/trajectory_scenarios.yaml`:
+  - straight
+  - constant curvature
+  - S-curve
+  - clothoid
+  - sharp corner
+- `evaluation.launch.py` remains the only formal trajectory benchmark entrypoint.
 - `benchmark_demo.launch.py` is explicitly a debug/demo tool entrypoint and is not the formal metrics source.
-- `wsl2_demo_ctl.sh` now launches `benchmark_demo.launch.py`.
+- `trajectory_generator_node` publishes deterministic reference paths on `/reference_path`.
 - `auto_eval_pipeline.py` was removed as a historical coupled path superseded by the converged structure.
 
 ## Benchmark configuration rules
-- Use `config/benchmark_defaults.yaml` as the single default parameter source for:
+- Use `config/benchmark_defaults.yaml` as the single runtime default parameter source for:
   - default benchmark scenario
   - planner/controller profile defaults
-  - default world/spawn/goal values
-  - default dynamic obstacle parameters
+  - simulation carrier world/spawn values
   - default benchmark-mode semantics
-- Use `config/baseline_world_scenarios.yaml` as the single scenario registration source.
-- If default values differ between files, treat `benchmark_defaults.yaml` and `baseline_world_scenarios.yaml` as the source of truth, then fix the launch code or docs.
+- Use `config/trajectory_scenarios.yaml` as the single trajectory registration source.
+- If default values differ between files, treat `benchmark_defaults.yaml` and `trajectory_scenarios.yaml` as the source of truth, then fix the launch code or docs.
 - All planner profiles use config/nav2_params.yaml; planner_profile:=rpp selects the RPP controller ID.
 - default/other profiles still map to `config/nav2_params.yaml`.
 - optional explicit `params_file` override is still supported.
 
 ## Current validation status
-- The formal benchmark backbone is available for scenario-based evaluation runs and result generation.
-- The manual demo/debug chain is available for interactive verification, visualization, and integration debugging.
+- The formal trajectory benchmark backbone is available for parameterized trajectory evaluation runs and result generation.
+- The manual demo/debug chain is available for interactive verification and visualization.
 - Lifecycle stability and run quality should still be validated before making strong comparative claims.
 - Recommended gate for formal comparison campaigns:
   - 3 consecutive runs with no Nav2 lifecycle transition failures

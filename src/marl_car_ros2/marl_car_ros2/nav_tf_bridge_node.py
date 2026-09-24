@@ -18,7 +18,7 @@ class NavTfBridgeNode(Node):
         self.declare_parameter("odom_topic", "/odom")
         self.declare_parameter("odom_frame", "odom")
         self.declare_parameter("base_frame", "base_link")
-        self.declare_parameter("laser_frame", "lidar_link")
+        self.declare_parameter("laser_frame", "laser_link")
         self.declare_parameter("laser_offset_x", 0.12)
         self.declare_parameter("laser_offset_y", 0.0)
         self.declare_parameter("laser_offset_z", 0.18)

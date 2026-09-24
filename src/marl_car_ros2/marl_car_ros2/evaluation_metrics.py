@@ -4,6 +4,7 @@ import json
 import sqlite3
 import statistics
 import math
+import yaml
 from pathlib import Path
 from dataclasses import dataclass, asdict
 from typing import Dict, List, Tuple, Any
@@ -62,11 +63,11 @@ def _inside_window(x: float, y: float, w: Dict[str, object]) -> bool:
 def _load_scenario_meta(db_path: str, scenario_name: str) -> Dict[str, object]:
     del db_path
     bench: Dict[str, object] = {}
-    cfg_path = Path(__file__).resolve().parents[1] / "config" / "baseline_world_scenarios.yaml"
+    cfg_path = Path(__file__).resolve().parents[1] / "config" / "trajectory_scenarios.yaml"
     if not cfg_path.exists():
         return bench
     with cfg_path.open("r", encoding="utf-8") as f:
-        data = json.load(f)
+        data = yaml.safe_load(f) or {}
     scenarios = data.get("scenarios", {})
     if not isinstance(scenarios, dict):
         return bench
@@ -76,6 +77,9 @@ def _load_scenario_meta(db_path: str, scenario_name: str) -> Dict[str, object]:
     file_bench = scenario.get("benchmark", {})
     if isinstance(file_bench, dict):
         bench.update(file_bench)
+    trajectory = scenario.get("trajectory")
+    if isinstance(trajectory, dict):
+        bench["trajectory"] = trajectory
     return bench
 
 
@@ -234,6 +238,23 @@ def _compute_dynamic_obstacle_metrics(
     return primary, supporting
 
 
+def _compute_trajectory_metrics(telemetry: List[Dict[str, object]], bench: Dict[str, object]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    from .trajectory_generator import generate_trajectory
+
+    trajectory = bench.get("trajectory", {})
+    reference = generate_trajectory(trajectory) if isinstance(trajectory, dict) else []
+    reference_xy = [(x, y) for x, y, _ in reference]
+    errors = [_distance_to_polyline(float(t.get("x", 0.0)), float(t.get("y", 0.0)), reference_xy) for t in telemetry]
+    primary = {
+        "mean_tracking_error_m": _mean(errors),
+        "max_tracking_error_m": max(errors) if errors else 0.0,
+        "path_sample_count": len(reference),
+        "average_speed_mps": _mean([abs(float(t.get("linear_speed", 0.0))) for t in telemetry]),
+    }
+    supporting = {"telemetry_sample_count": len(telemetry)}
+    return primary, supporting
+
+
 def compute_metrics(db_path: str, timeline_jsonl: str = "") -> MetricsReport:
     db = sqlite3.connect(db_path)
     summary = _read_latest_summary(db)
@@ -257,7 +278,9 @@ def compute_metrics(db_path: str, timeline_jsonl: str = "") -> MetricsReport:
         )
     )
 
-    if suite == "narrow_corridor":
+    if suite == "trajectory":
+        primary, supporting = _compute_trajectory_metrics(telemetry, bench)
+    elif suite == "narrow_corridor":
         primary, supporting = _compute_narrow_corridor_metrics(telemetry, bench)
     elif suite == "sharp_turns":
         primary, supporting = _compute_sharp_turn_metrics(telemetry, bench)

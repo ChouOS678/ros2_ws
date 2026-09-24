@@ -7,5 +7,6 @@
         "/home/grok/ros2_ws/install/marl_car_ros2/lib/python3.12/site-packages",
         "/opt/ros/jazzy/lib/python3.12/site-packages"
     ],
-    "ROS2.distro": "jazzy"
+    "ROS2.distro": "jazzy",
+    "cmake.sourceDirectory": "/home/grok/ros2_ws/src/marl_nav2_plugins"
 }

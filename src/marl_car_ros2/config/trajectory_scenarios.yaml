@@ -1,0 +1,95 @@
+schema_version: trajectory_benchmark.v1
+scenarios:
+  straight:
+    tag: trajectory_straight
+    category: straight_tracking
+    benchmark:
+      suite: trajectory
+      result_group: primary
+      objective: straight_line_tracking
+    trajectory:
+      type: straight
+      length_m: 8.0
+      ds_m: 0.05
+      kappa_max: 0.0
+      frame_id: map
+    goal:
+      x: 8.0
+      y: 0.0
+      yaw: 0.0
+
+  constant_curvature:
+    tag: trajectory_constant_curvature
+    category: constant_curvature
+    benchmark:
+      suite: trajectory
+      result_group: primary
+      objective: constant_curvature_tracking
+    trajectory:
+      type: constant_curvature
+      length_m: 8.0
+      ds_m: 0.05
+      kappa_max: 0.18
+      frame_id: map
+    goal:
+      x: 5.16
+      y: 4.85
+      yaw: 1.44
+
+  s_curve:
+    tag: trajectory_s_curve
+    category: smooth_s_curve
+    benchmark:
+      suite: trajectory
+      result_group: primary
+      objective: curvature_continuity_tracking
+    trajectory:
+      type: s_curve
+      length_m: 10.0
+      ds_m: 0.05
+      kappa_max: 0.28
+      curvature_frequency: 1.0
+      frame_id: map
+    goal:
+      x: 9.35
+      y: 0.0
+      yaw: 0.0
+
+  clothoid:
+    tag: trajectory_clothoid
+    category: curvature_ramp
+    benchmark:
+      suite: trajectory
+      result_group: primary
+      objective: curvature_ramp_tracking
+    trajectory:
+      type: clothoid
+      length_m: 10.0
+      ds_m: 0.05
+      kappa_max: 0.24
+      curvature_rate: 0.08
+      frame_id: map
+    goal:
+      x: 8.56
+      y: 3.36
+      yaw: 0.8
+
+  sharp_corner:
+    tag: trajectory_sharp_corner
+    category: sharp_corner
+    benchmark:
+      suite: trajectory
+      result_group: primary
+      objective: corner_tracking
+    trajectory:
+      type: sharp_corner
+      length_m: 8.0
+      ds_m: 0.05
+      kappa_max: 0.65
+      corner_center_s_m: 4.0
+      corner_length_m: 1.2
+      frame_id: map
+    goal:
+      x: 6.8
+      y: 2.0
+      yaw: 1.2

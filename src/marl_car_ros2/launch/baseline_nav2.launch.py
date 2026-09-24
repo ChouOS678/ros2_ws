@@ -33,6 +33,9 @@ def generate_launch_description() -> LaunchDescription:
     dynamic_obstacle_crossing_span_m = LaunchConfiguration("dynamic_obstacle_crossing_span_m")
     dynamic_obstacle_initial_direction = LaunchConfiguration("dynamic_obstacle_initial_direction")
     dynamic_obstacle_repeat = LaunchConfiguration("dynamic_obstacle_repeat")
+    start_robot_state_publisher = LaunchConfiguration("start_robot_state_publisher")
+    scenario_name = LaunchConfiguration("scenario_name")
+    scenario_file = LaunchConfiguration("scenario_file")
     pkg_share = get_package_share_directory("marl_car_ros2")
     defaults = load_benchmark_defaults(pkg_share)
     spawn_defaults = defaults.get("spawn", {}) if isinstance(defaults.get("spawn", {}), dict) else {}
@@ -85,6 +88,31 @@ def generate_launch_description() -> LaunchDescription:
         condition=IfCondition(start_baseline_controller),
     )
 
+    with open(os.path.join(pkg_share, "urdf", "simple_marl_car.urdf"), "r", encoding="utf-8") as urdf_file:
+        robot_description = urdf_file.read()
+    robot_state_publisher = Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        name="robot_state_publisher",
+        output="screen",
+        parameters=[{"use_sim_time": use_sim_time, "robot_description": robot_description}],
+        condition=IfCondition(start_robot_state_publisher),
+    )
+    trajectory_generator = Node(
+        package="marl_car_ros2",
+        executable="trajectory_generator_node",
+        name="trajectory_generator_node",
+        output="screen",
+        parameters=[{"use_sim_time": use_sim_time, "scenario_name": scenario_name, "scenario_file": scenario_file, "output_topic": "/reference_path", "publish_once": True}],
+    )
+    map_to_odom = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name="map_to_odom",
+        arguments=["0", "0", "0", "0", "0", "0", "map", "odom"],
+        output="screen",
+    )
+
     return LaunchDescription(
         [
             DeclareLaunchArgument("use_sim_time", default_value="true"),
@@ -93,6 +121,9 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("start_bridge", default_value="true"),
             DeclareLaunchArgument("start_monitor", default_value="true"),
             DeclareLaunchArgument("start_baseline_controller", default_value="true"),
+            DeclareLaunchArgument("start_robot_state_publisher", default_value="true"),
+            DeclareLaunchArgument("scenario_name", default_value="straight"),
+            DeclareLaunchArgument("scenario_file", default_value=os.path.join(pkg_share, "config", "trajectory_scenarios.yaml")),
             DeclareLaunchArgument(
                 "world_file",
                 default_value=resolve_pkg_path(pkg_share, str(defaults.get("world_file", "")), fallback="worlds/minimal.world"),
@@ -114,6 +145,9 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("dynamic_obstacle_initial_direction", default_value=str(dynamic_defaults.get("initial_direction", 1.0))),
             DeclareLaunchArgument("dynamic_obstacle_repeat", default_value=str(bool(dynamic_defaults.get("repeat", True))).lower()),
             sim,
+            robot_state_publisher,
+            trajectory_generator,
+            map_to_odom,
             baseline_controller,
         ]
     )

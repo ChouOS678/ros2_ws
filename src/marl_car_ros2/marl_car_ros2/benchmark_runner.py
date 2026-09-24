@@ -82,7 +82,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--scenario-name",
         default="narrow_corridor",
-        choices=("narrow_corridor", "sharp_turns", "dynamic_crossing", "custom"),
+        choices=("straight", "constant_curvature", "s_curve", "clothoid", "sharp_corner", "custom"),
         help="Benchmark scenario to run.",
     )
     parser.add_argument("--planner-profile", default="unspecified", help="planner_profile passed to evaluation launch.")

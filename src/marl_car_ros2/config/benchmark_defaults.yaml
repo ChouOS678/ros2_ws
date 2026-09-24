@@ -1,6 +1,6 @@
 {
   "benchmark_defaults": {
-    "scenario_name": "narrow_corridor",
+    "scenario_name": "straight",
     "agent_mode": true,
     "planner_profile": "unspecified",
     "controller_profile": "",

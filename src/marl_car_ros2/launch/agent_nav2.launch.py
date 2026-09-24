@@ -48,8 +48,13 @@ def generate_launch_description() -> LaunchDescription:
     dynamic_obstacle_crossing_span_m = LaunchConfiguration("dynamic_obstacle_crossing_span_m")
     dynamic_obstacle_initial_direction = LaunchConfiguration("dynamic_obstacle_initial_direction")
     dynamic_obstacle_repeat = LaunchConfiguration("dynamic_obstacle_repeat")
+    start_robot_state_publisher = LaunchConfiguration("start_robot_state_publisher")
+    scenario_name = LaunchConfiguration("scenario_name")
+    scenario_file = LaunchConfiguration("scenario_file")
 
     pkg_share = get_package_share_directory("marl_car_ros2")
+    with open(os.path.join(pkg_share, "urdf", "simple_marl_car.urdf"), "r", encoding="utf-8") as urdf_file:
+        robot_description = urdf_file.read()
     defaults = load_benchmark_defaults(pkg_share)
     spawn_defaults = defaults.get("spawn", {}) if isinstance(defaults.get("spawn", {}), dict) else {}
     goal_defaults = defaults.get("goal", {}) if isinstance(defaults.get("goal", {}), dict) else {}
@@ -144,12 +149,21 @@ def generate_launch_description() -> LaunchDescription:
         parameters=[
             {
                 "use_sim_time": use_sim_time,
-                "publish_laser_tf": True,
+                "publish_laser_tf": False,
                 "use_msg_frame_ids": False,
-                "use_msg_stamp": False,
+                "use_msg_stamp": True,
             }
         ],
         condition=IfCondition(start_nav_tf_bridge),
+    )
+
+    robot_state_publisher = Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        name="robot_state_publisher",
+        output="screen",
+        parameters=[{"use_sim_time": use_sim_time, "robot_description": robot_description}],
+        condition=IfCondition(start_robot_state_publisher),
     )
 
     task_agent = Node(
@@ -190,9 +204,32 @@ def generate_launch_description() -> LaunchDescription:
                 "goal_frame": "odom",
                 "startup_delay_s": 4.0,
                 "controller_id": controller_profile,
+                "use_reference_path_goal": True,
+                "reference_path_topic": "/reference_path",
             }
         ],
         condition=IfCondition(start_goal_sender),
+    )
+
+    trajectory_generator = Node(
+        package="marl_car_ros2",
+        executable="trajectory_generator_node",
+        name="trajectory_generator_node",
+        output="screen",
+        parameters=[{
+            "use_sim_time": use_sim_time,
+            "scenario_name": scenario_name,
+            "scenario_file": scenario_file,
+            "output_topic": "/reference_path",
+            "publish_once": True,
+        }],
+    )
+    map_to_odom = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name="map_to_odom",
+        arguments=["0", "0", "0", "0", "0", "0", "map", "odom"],
+        output="screen",
     )
 
     return LaunchDescription(
@@ -203,7 +240,10 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("start_bridge", default_value="true"),
             DeclareLaunchArgument("start_monitor", default_value="true"),
             DeclareLaunchArgument("start_nav2", default_value=start_nav2_default),
-            DeclareLaunchArgument("start_nav_tf_bridge", default_value="true"),
+            DeclareLaunchArgument("start_nav_tf_bridge", default_value="false"),
+            DeclareLaunchArgument("start_robot_state_publisher", default_value="true"),
+            DeclareLaunchArgument("scenario_name", default_value="straight"),
+            DeclareLaunchArgument("scenario_file", default_value=os.path.join(pkg_share, "config", "trajectory_scenarios.yaml")),
             DeclareLaunchArgument("autostart", default_value="true"),
             DeclareLaunchArgument(
                 "world_file",
@@ -245,6 +285,9 @@ def generate_launch_description() -> LaunchDescription:
             *missing_pkgs_info,
             *( [nav2_group] if nav2_group is not None else [] ),
             nav_tf_bridge,
+            robot_state_publisher,
+            trajectory_generator,
+            map_to_odom,
             nav_executor,
             task_agent,
             supervisor,

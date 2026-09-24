@@ -38,9 +38,9 @@ def generate_launch_description() -> LaunchDescription:
         defaults.get("dynamic_obstacle", {}) if isinstance(defaults.get("dynamic_obstacle", {}), dict) else {}
     )
     default_world_path = resolve_pkg_path(pkg_share, str(defaults.get("world_file", "")), fallback="worlds/minimal.world")
-    model_path = os.path.join(pkg_share, "models", "simple_marl_car", "model.sdf")
+    model_path = os.path.join(pkg_share, "urdf", "simple_marl_car.urdf")
 
-    gazebo_backend_info = LogInfo(msg="Using Gazebo Sim backend via ros_gz_sim (Jazzy default).")
+    gazebo_backend_info = LogInfo(msg="Using URDF model with embedded Gazebo plugins via ros_gz_sim.")
 
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -73,12 +73,17 @@ def generate_launch_description() -> LaunchDescription:
             "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
             "/model/simple_marl_car/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
             [dynamic_obstacle_cmd_topic, "@geometry_msgs/msg/Twist]gz.msgs.Twist"],
-            "/model/simple_marl_car/odometry@nav_msgs/msg/Odometry[gz.msgs.Odometry",
+            "/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
+            "/model/simple_marl_car/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
             "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
+            "/camera/image@sensor_msgs/msg/Image[gz.msgs.Image",
+            "/camera/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked",
+            "/camera/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
         ],
         remappings=[
             ("/model/simple_marl_car/cmd_vel", "/cmd_vel"),
-            ("/model/simple_marl_car/odometry", "/odom"),
+            ("/camera/image", "/camera/image_raw"),
+            ("/model/simple_marl_car/tf", "/tf"),
         ],
         condition=IfCondition(start_bridge),
     )

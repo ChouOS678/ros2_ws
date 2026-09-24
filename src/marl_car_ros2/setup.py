@@ -16,7 +16,6 @@ setup(
         (f"share/{package_name}/rviz", glob("rviz/*.rviz")),
         (f"share/{package_name}/urdf", glob("urdf/*.urdf")),
         (f"share/{package_name}/worlds", glob("worlds/*.world")),
-        (f"share/{package_name}/models/simple_marl_car", glob("models/simple_marl_car/*")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
@@ -45,6 +44,7 @@ setup(
             "world_event_marker = marl_car_ros2.world_event_marker_node:main",
             "evaluation_metrics = marl_car_ros2.evaluation_metrics:main",
             "benchmark_runner = marl_car_ros2.benchmark_runner:main",
+            "trajectory_generator_node = marl_car_ros2.trajectory_generator_node:main",
         ],
     },
 )

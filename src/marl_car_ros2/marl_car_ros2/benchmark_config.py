@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-import json
 import os
 from typing import Any, Dict
+
+import yaml
 
 
 def _load_yaml(path: str) -> Dict[str, Any]:
     with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+        data = yaml.safe_load(f)
     return data if isinstance(data, dict) else {}
 
 
@@ -26,7 +27,7 @@ def load_demo_defaults(pkg_share: str) -> Dict[str, Any]:
 
 
 def load_scenarios(pkg_share: str) -> Dict[str, Any]:
-    path = os.path.join(pkg_share, "config", "baseline_world_scenarios.yaml")
+    path = os.path.join(pkg_share, "config", "trajectory_scenarios.yaml")
     data = _load_yaml(path)
     scenarios = data.get("scenarios", {})
     return scenarios if isinstance(scenarios, dict) else {}
