@@ -185,10 +185,14 @@ class SupervisorNode(Node):
             snapshot=snapshot,
         )
 
-        if snapshot is not None and snapshot.goal_dist <= self.goal_tolerance:
-            self.mission_status = "success"
-        elif override_reason == "sensor_not_ready":
+        if snapshot is None:
             self.mission_status = "degraded"
+        elif snapshot.goal_dist <= self.goal_tolerance:
+            self.mission_status = "success"
+        elif self.mission_status != "success":
+            self.mission_status = "running"
+        if self.mission_status == "success":
+            final_cmd = Twist()
 
         self._update_blocked_duration(now, bool(override_reason))
         self.cmd_pub.publish(final_cmd)

@@ -2,6 +2,37 @@
 
 This repository is organized around one formal benchmark backbone and one separate manual demo/debug chain.
 
+## Project Phase and Progress (2026-09-24)
+
+The project has entered **Phase 2: initial comparative data collection**. The parameterized trajectory scenarios and the benchmark execution path are substantially in place; the current focus is collecting enough comparable runs to evaluate controller performance with confidence.
+
+The first five-scenario comparison campaign ran `PP`, `APP`, `RPP`, and `DWPP` once each per scenario: 20 runs total, 18 successful and 2 unsuccessful. All 20 reports and their corresponding telemetry were imported into the benchmark portal database, totaling 34,454 telemetry samples for this campaign. The portal keeps this campaign separate from historical runs so the comparison is not mixed with older results.
+
+Initial observations from this single-run-per-combination campaign:
+
+- `straight`: all four controllers had effectively zero tracking error; this case does not discriminate controller quality well.
+- `constant_curvature`: `PP` had the lowest mean tracking error at about 0.091 m, closely followed by `RPP` at about 0.092 m.
+- `s_curve`: `PP` had the lowest mean tracking error at about 0.0058 m, followed by `RPP` at about 0.0077 m.
+- `sharp_corner`: `APP` had the lowest mean tracking error at about 0.261 m; `DWPP` had a slightly lower maximum deviation than the other controllers.
+- `clothoid`: `PP` and `APP` completed. `RPP` and `DWPP` did not complete: the RPP log reports an empty plan (`Resulting plan has 0 poses in it`), while DWPP reports `Failed to make progress`.
+
+These are preliminary observations, not stable rankings: each scenario/controller combination has only one run. In particular, DWPP's low recorded tracking error on the failed clothoid run must not be interpreted as a successful result. No single controller was best across all scenarios.
+
+The independent analysis web app is in `benchmark_portal/`. It stores run reports and run-ID-matched telemetry in `benchmark_portal/data/benchmark.sqlite`, shows historical and campaign data separately, and reports tracking error, speed, completion rate, and available telemetry-derived metrics. Start it from the workspace root with:
+
+```bash
+python3 -m benchmark_portal.backend
+```
+
+Then open `http://localhost:8765`. The campaign reports, logs, and telemetry archives are stored beneath `benchmark_portal/data/campaigns/campaign_20260924_114023/`.
+
+### Next Phase
+
+- Run repeated trials for each controller/scenario combination (at least three, preferably five or more) with the same initial state and configuration.
+- Investigate the two clothoid failures and verify that completion, tracking error, speed, and smoothness are measured consistently.
+- Use repeated-run distributions and completion rates to explain scenario-specific strengths and trade-offs; avoid causal or universal claims from one run.
+- Grow the dataset through `python3 -m benchmark_portal.collect_campaign`; the benchmark code and scenario definitions remain the source of truth.
+
 ## Refactor Summary
 
 This convergence pass made the following structural changes:
@@ -75,27 +106,30 @@ The frame hierarchy is `base_footprint -> base_link`, with four continuous wheel
 
 Trajectory benchmark registration is centralized in `src/marl_car_ros2/config/trajectory_scenarios.yaml`.
 
-Current benchmark categories:
+Current parameterized trajectory scenarios:
 
-- `sharp_turns`
-  high-curvature / sharp-turn benchmark
-- `narrow_corridor`
-  narrow-passage benchmark
-- `dynamic_crossing`
-  dynamic-obstacle extension benchmark
+- `straight`
+- `constant_curvature`
+- `s_curve`
+- `clothoid`
+- `sharp_corner`
 
-Scenario metadata and registration stay in one place:
+Each scenario defines trajectory geometry, sampling interval, curvature parameters, and goal pose in one place:
 
 - `src/marl_car_ros2/config/trajectory_scenarios.yaml`
 
 Formal launch examples:
 
 ```bash
-ros2 launch marl_car_ros2 evaluation.launch.py scenario_name:=narrow_corridor
+ros2 launch marl_car_ros2 evaluation.launch.py scenario_name:=straight planner_profile:=pp
+ros2 launch marl_car_ros2 evaluation.launch.py scenario_name:=s_curve planner_profile:=app
+ros2 run marl_car_ros2 benchmark_runner --scenario-name clothoid --planner-profile rpp
+```
 
-ros2 launch marl_car_ros2 evaluation.launch.py scenario_name:=sharp_turns planner_profile:=rpp
+To run the full 5-scenario × 4-controller comparison and import each result into the portal database:
 
-ros2 run marl_car_ros2 benchmark_runner --scenario-name dynamic_crossing --planner-profile rpp
+```bash
+python3 -m benchmark_portal.collect_campaign
 ```
 
 Manual demo example:
@@ -241,12 +275,16 @@ The formal benchmark no longer selects scenario-specific Gazebo worlds. `minimal
 
 ```bash
 ros2 launch marl_car_ros2 evaluation.launch.py scenario_name:=straight
-ros2 launch marl_car_ros2 evaluation.launch.py scenario_name:=sharp_corner
-ros2 run marl_car_ros2 benchmark_runner --scenario-name s_curve
+ros2 launch marl_car_ros2 evaluation.launch.py scenario_name:=constant_curvature planner_profile:=app
+ros2 launch marl_car_ros2 evaluation.launch.py scenario_name:=s_curve planner_profile:=rpp
+ros2 launch marl_car_ros2 evaluation.launch.py scenario_name:=clothoid planner_profile:=dwpp
+ros2 launch marl_car_ros2 evaluation.launch.py scenario_name:=sharp_corner planner_profile:=pp
 ```
 
 ## Current Validation Notes
 
 - The formal benchmark backbone is available for scenario-based evaluation and result generation.
 - The demo/debug chain is available for RViz/Gazebo validation, operator-triggered checks, and integration debugging.
-- Stability and mission quality should still be verified before making strong comparative claims across controller profiles.
+- One initial run exists for each of the 20 scenario/controller combinations; repeated runs are still required before making strong comparative claims.
+- The latest campaign database and per-run telemetry are available in `benchmark_portal/data/benchmark.sqlite`; current campaign completion is 18/20.
+- Clothoid completion remains a known evaluation issue for RPP and DWPP and should be investigated in the next data-collection phase.

@@ -21,7 +21,7 @@ def curvature_function(trajectory_type: str, s: float, length: float, config: Ma
         return kappa_max
     if kind == "s_curve":
         frequency = float(config.get("curvature_frequency", 1.0))
-        return kappa_max * math.sin(2.0 * math.pi * frequency * s / max(length, 1e-9))
+        return kappa_max * math.cos(2.0 * math.pi * frequency * s / max(length, 1e-9))
     if kind == "clothoid":
         rate = float(config.get("curvature_rate", 0.0))
         return min(kappa_max, max(0.0, rate * s))

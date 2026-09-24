@@ -108,7 +108,8 @@ class NavGoalSenderNode(Node):
         pose.pose.orientation.y = qy
         pose.pose.orientation.z = qz
         pose.pose.orientation.w = qw
-        self.goal_pub.publish(pose)
+        if not (self.use_reference_path_goal and self.reference_path is not None):
+            self.goal_pub.publish(pose)
 
         if self.controller_id:
             controller_msg = String()

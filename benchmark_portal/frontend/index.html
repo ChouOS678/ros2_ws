@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d1118">
+  <title>Benchmark Observatory · PP 算法评测</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Benchmark Observatory 首页">
+        <span class="brand-mark">B<span>·</span></span>
+        <span><strong>Benchmark</strong><small>OBSERVATORY</small></span>
+      </a>
+      <div class="top-actions">
+        <span class="live-indicator"><i></i><span id="connection-label">连接中</span></span>
+        <button class="button button-quiet" id="sync-button">同步遥测</button>
+        <button class="button button-primary" id="import-button">＋ 导入运行报告</button>
+        <input id="file-input" type="file" accept=".json,application/json" multiple hidden>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="eyebrow"><span class="eyebrow-line"></span> ROBOTICS · CONTROLLER EVALUATION</div>
+        <div class="intro-row">
+          <div>
+            <h1>让每一次运行<br><span>都变成可解释的证据。</span></h1>
+            <p>对比 Pure Pursuit 算法族在不同轨迹场景下的实测表现。误差、速度、稳定性与成功率并列呈现，不以单一分数掩盖取舍。</p>
+          </div>
+          <div class="run-stamp"><span class="stamp-dot"></span><span id="last-updated">正在读取本地实验数据</span></div>
+        </div>
+      </section>
+
+      <section class="kpi-grid" aria-label="数据概览">
+        <article class="kpi-card"><span class="kpi-label">已收录运行</span><strong id="kpi-runs">—</strong><span class="kpi-foot">包含成功与失败记录</span><span class="kpi-icon">↗</span></article>
+        <article class="kpi-card"><span class="kpi-label">轨迹场景</span><strong id="kpi-scenes">—</strong><span class="kpi-foot">按场景分组对比</span><span class="kpi-icon">⌁</span></article>
+        <article class="kpi-card"><span class="kpi-label">控制器配置</span><strong id="kpi-controllers">—</strong><span class="kpi-foot">PP 算法族 profiles</span><span class="kpi-icon">◈</span></article>
+        <article class="kpi-card kpi-accent"><span class="kpi-label">任务完成</span><strong id="kpi-completion">—</strong><span class="kpi-foot" id="kpi-success-note">等待运行数据</span><span class="kpi-icon">✓</span></article>
+      </section>
+
+      <section class="analysis-layout">
+        <aside class="scenario-panel panel">
+          <div class="panel-heading"><div><span class="section-index">01 / CASE</span><h2>场景</h2></div><span class="tiny-count" id="scene-count">0</span></div>
+          <div id="scenario-list" class="scenario-list"></div>
+          <div class="aside-note"><span>i</span><p>不同场景的难度与目标不同。仅在同一场景内比较算法，避免跨场景误读。</p></div>
+        </aside>
+
+        <section class="comparison-panel panel">
+          <div class="comparison-head">
+            <div><span class="section-index">02 / COMPARISON</span><h2 id="comparison-title">算法表现</h2></div>
+            <div class="select-group">
+              <label class="metric-select-label">数据批次
+                <select id="campaign-select" aria-label="数据批次"></select>
+              </label>
+              <label class="metric-select-label">比较指标
+                <select id="metric-select" aria-label="比较指标"></select>
+              </label>
+            </div>
+          </div>
+          <div class="chart-meta"><span id="metric-description">成功运行的平均指标；失败运行单独计入完成率。</span><span class="legend"><i></i> 成功运行的指标均值</span></div>
+          <div id="chart" class="chart" role="img" aria-label="控制器指标对比图"></div>
+          <div class="chart-scale"><span id="scale-low">—</span><span>数值越优方向按指标定义</span><span id="scale-high">—</span></div>
+          <div class="divider"></div>
+          <div class="controller-grid" id="controller-grid"></div>
+          <div class="insight-box"><div class="insight-icon">✳</div><div><span class="insight-title">数据解读 · 证据边界</span><ul id="insight-list"></ul></div></div>
+        </section>
+      </section>
+
+      <section class="runs-panel panel">
+        <div class="panel-heading runs-heading"><div><span class="section-index">03 / RUN LOG</span><h2>运行记录</h2></div><span class="table-caption">最新导入优先 · 报告与遥测分开标识</span></div>
+        <div class="table-wrap"><table><thead><tr><th>运行 ID</th><th>场景</th><th>控制器</th><th>状态</th><th>核心结果</th><th>遥测</th></tr></thead><tbody id="runs-body"></tbody></table></div>
+      </section>
+
+      <footer class="footer"><span>BENCHMARK OBSERVATORY <b>·</b> 本地实验数据分析</span><span>结论仅描述当前样本，不替代受控实验与因果分析。</span></footer>
+    </main>
+    <div class="toast" id="toast" role="status"></div>
+  </div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

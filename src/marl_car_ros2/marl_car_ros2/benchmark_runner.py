@@ -40,21 +40,62 @@ def _read_last_summary(summary_path: Path) -> Dict[str, object]:
 
 
 def _terminate_proc(proc: subprocess.Popen[str], grace_s: float = 8.0) -> None:
-    if proc.poll() is not None:
-        return
+    descendants = _descendant_pids(proc.pid)
+    for pid in reversed(descendants):
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
     try:
         os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
     except ProcessLookupError:
-        return
+        pass
     deadline = time.time() + grace_s
     while time.time() < deadline:
-        if proc.poll() is not None:
+        if proc.poll() is not None and not any(_pid_is_running(pid) for pid in descendants):
             return
         time.sleep(0.2)
+    for pid in reversed(descendants):
+        if not _pid_is_running(pid):
+            continue
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
     try:
         os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
     except ProcessLookupError:
-        return
+        pass
+
+
+def _descendant_pids(root_pid: int) -> list[int]:
+    children: dict[int, list[int]] = {}
+    for entry in Path("/proc").iterdir():
+        if not entry.name.isdigit():
+            continue
+        try:
+            stat = (entry / "stat").read_text(encoding="utf-8")
+            fields = stat[stat.rfind(")") + 2 :].split()
+            parent_pid = int(fields[1])
+        except (OSError, IndexError, ValueError):
+            continue
+        children.setdefault(parent_pid, []).append(int(entry.name))
+
+    descendants: list[int] = []
+    pending = list(children.get(root_pid, []))
+    while pending:
+        pid = pending.pop()
+        descendants.append(pid)
+        pending.extend(children.get(pid, []))
+    return descendants
+
+
+def _pid_is_running(pid: int) -> bool:
+    try:
+        stat = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8")
+    except OSError:
+        return False
+    return stat[stat.rfind(")") + 2 :].split()[0] != "Z"
 
 
 def _build_launch_cmd(args: argparse.Namespace, run_id: str) -> Sequence[str]:
@@ -71,6 +112,8 @@ def _build_launch_cmd(args: argparse.Namespace, run_id: str) -> Sequence[str]:
         f"start_monitor:={str(args.start_monitor).lower()}",
         f"start_mutator:={str(args.start_mutator).lower()}",
         f"start_bridge:={str(args.start_bridge).lower()}",
+        f"start_rviz:={str(args.start_rviz).lower()}",
+        f"start_visualizer:={str(args.start_visualizer).lower()}",
     ]
     if args.params_file:
         cmd.append(f"params_file:={args.params_file}")
@@ -97,6 +140,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-start-mutator", dest="start_mutator", action="store_false")
     parser.add_argument("--start-bridge", action="store_true", default=True)
     parser.add_argument("--no-start-bridge", dest="start_bridge", action="store_false")
+    parser.add_argument("--start-rviz", action="store_true", help="Start RViz with the benchmark run.")
+    parser.add_argument("--start-visualizer", action="store_true", help="Publish the odometry trace for RViz.")
     parser.add_argument("--log-dir", default="/tmp/marl_logs", help="Directory used by monitor_logger.")
     parser.add_argument("--report-path", default="", help="Optional explicit output report path.")
     parser.add_argument("--launch-log-path", default="", help="Optional explicit launch stdout/stderr log path.")
@@ -104,8 +149,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--terminal-grace-s",
         type=float,
-        default=8.0,
-        help="Minimum runtime before terminal mission states are accepted.",
+        default=None,
+        help="Minimum runtime before terminal mission states are accepted; defaults to 40s for trajectory cases and 8s otherwise.",
     )
     parser.add_argument(
         "--settle-after-terminal-s",
@@ -123,6 +168,14 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    if args.terminal_grace_s is None:
+        args.terminal_grace_s = 40.0 if args.scenario_name in {
+            "straight",
+            "constant_curvature",
+            "s_curve",
+            "clothoid",
+            "sharp_corner",
+        } else 8.0
     run_id = f"{args.scenario_name}_{args.planner_profile}_{_timestamp()}"
     log_dir = Path(args.log_dir)
     if log_dir.exists() and not args.keep_log_dir:

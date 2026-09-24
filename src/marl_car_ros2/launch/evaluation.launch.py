@@ -1,7 +1,9 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, SetEnvironmentVariable
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 from marl_car_ros2.benchmark_config import (
     load_benchmark_defaults,
@@ -27,6 +29,8 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
     params_file = LaunchConfiguration("params_file").perform(context).strip()
     run_id = LaunchConfiguration("run_id").perform(context)
     scenario_file = LaunchConfiguration("scenario_file").perform(context)
+    start_rviz = LaunchConfiguration("start_rviz")
+    start_visualizer = LaunchConfiguration("start_visualizer")
 
     world_file = LaunchConfiguration("world_file").perform(context)
     spawn_x = LaunchConfiguration("spawn_x").perform(context)
@@ -147,7 +151,49 @@ def _build_eval_stack(context, pkg_share: str, launch_dir: str, scenarios: dict)
             }.items(),
         )
 
-    return [*env_actions, nav_stack]
+    rviz = Node(
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        output="screen",
+        arguments=["-d", os.path.join(pkg_share, "rviz", "benchmark.rviz")],
+        parameters=[{"use_sim_time": use_sim_time.lower() == "true"}],
+        additional_env={"QT_X11_NO_MITSHM": "1", "LIBGL_ALWAYS_SOFTWARE": "1"},
+        condition=IfCondition(start_rviz),
+    )
+    visualizer = Node(
+        package="marl_car_ros2",
+        executable="benchmark_visualizer",
+        name="benchmark_visualizer",
+        output="screen",
+        parameters=[
+            {
+                "use_sim_time": use_sim_time.lower() == "true",
+                "frame_id": "odom",
+                "odom_topic": "/odom",
+                "reference_input_topic": "/reference_path",
+                "reference_output_topic": "/benchmark/reference_path",
+                "robot_path_topic": "/benchmark/robot_path",
+            }
+        ],
+        condition=IfCondition(start_visualizer),
+    )
+    with open(os.path.join(pkg_share, "urdf", "simple_marl_car.urdf"), "r", encoding="utf-8") as urdf_file:
+        robot_description = urdf_file.read()
+    joint_state_publisher = Node(
+        package="joint_state_publisher",
+        executable="joint_state_publisher",
+        name="joint_state_publisher",
+        output="screen",
+        parameters=[
+            {
+                "use_sim_time": use_sim_time.lower() == "true",
+                "robot_description": robot_description,
+            }
+        ],
+        condition=IfCondition(start_visualizer),
+    )
+    return [*env_actions, nav_stack, visualizer, joint_state_publisher, rviz]
 
 
 def generate_launch_description() -> LaunchDescription:
@@ -169,6 +215,8 @@ def generate_launch_description() -> LaunchDescription:
             DeclareLaunchArgument("start_mutator", default_value="true"),
             DeclareLaunchArgument("start_bridge", default_value="true"),
             DeclareLaunchArgument("start_monitor", default_value="true"),
+            DeclareLaunchArgument("start_rviz", default_value="false"),
+            DeclareLaunchArgument("start_visualizer", default_value="false"),
             DeclareLaunchArgument("agent_mode", default_value=str(bool(defaults.get("agent_mode", True))).lower()),
             DeclareLaunchArgument("scenario_name", default_value=str(defaults.get("scenario_name", "narrow_corridor"))),
             DeclareLaunchArgument("planner_profile", default_value=str(defaults.get("planner_profile", "unspecified"))),

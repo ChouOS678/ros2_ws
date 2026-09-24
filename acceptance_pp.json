@@ -1,0 +1,45 @@
+{
+  "run_id": "straight_pp_20260924_090747",
+  "stop_reason": "terminal_status:success",
+  "launch_command": [
+    "ros2",
+    "launch",
+    "marl_car_ros2",
+    "evaluation.launch.py",
+    "scenario_name:=straight",
+    "agent_mode:=true",
+    "planner_profile:=pp",
+    "run_id:=straight_pp_20260924_090747",
+    "start_gazebo:=true",
+    "start_monitor:=true",
+    "start_mutator:=true",
+    "start_bridge:=true"
+  ],
+  "db_path": "/tmp/marl_logs/timeline.db",
+  "timeline_events_path": "/tmp/marl_logs/monitor_timeline_event.jsonl",
+  "summary_path": "/tmp/marl_logs/monitor_summary.jsonl",
+  "launch_log_path": "/home/grok/ros2_ws/acceptance_pp.log",
+  "report": {
+    "scenario_name": "straight",
+    "suite": "trajectory",
+    "result_group": "primary",
+    "objective": "straight_line_tracking",
+    "mission_completion_status": "success",
+    "mission_duration_s": 26.329305171966553,
+    "primary_metrics": {
+      "mean_tracking_error_m": 0.10117858862941928,
+      "max_tracking_error_m": 1.5660359069313627,
+      "path_sample_count": 161,
+      "average_speed_mps": 0.5083953241229299
+    },
+    "supporting_metrics": {
+      "telemetry_sample_count": 941
+    },
+    "timeline_metrics": {
+      "mode_switch_count": 0,
+      "no_progress_count": 0,
+      "recovery_start_count": 0,
+      "replan_count_timeline": 0
+    }
+  }
+}
